@@ -1,5 +1,5 @@
 const express = require('express');
-const { LineOrder } = require('../models');
+const { LineOrder } = require('../../models');
 const router = express.Router();
 
 // Create a new line order

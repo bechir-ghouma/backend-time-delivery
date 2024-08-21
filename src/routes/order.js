@@ -1,5 +1,5 @@
 const express = require('express');
-const { Order, LineOrder, sequelize } = require('../models');  // Import sequelize
+const { Order, LineOrder, sequelize } = require('../../models');  // Import sequelize
 const router = express.Router();
 
 // Create a new order
