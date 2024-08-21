@@ -1,8 +1,8 @@
 const express = require('express');
 const { sequelize } = require('./models');
 const userRoutes = require('./src/routes/userRoutes');
-const orderRoutes = require('./src/routes/order');
-const lineOrderRoutes = require('./src/routes/lineorder');
+const orderRoutes = require('./src/routes/orderRoutes');
+const lineOrderRoutes = require('./src/routes/lineOrderRoutes');
 
 const app = express();
 
