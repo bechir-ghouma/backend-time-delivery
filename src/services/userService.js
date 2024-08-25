@@ -29,6 +29,10 @@ class UserService {
     await User.destroy({ where: { id: userId } });
     return user;
   }
+
+  async getUsersByRole(role) {
+    return User.findAll({ where: { role } });
+  }
 }
 
 module.exports = new UserService();

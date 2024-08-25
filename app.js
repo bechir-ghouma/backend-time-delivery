@@ -3,8 +3,13 @@ const { sequelize } = require('./models');
 const userRoutes = require('./src/routes/userRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const lineOrderRoutes = require('./src/routes/lineOrderRoutes');
+const cors = require('cors'); // Import the cors package
+
 
 const app = express();
+
+app.use(cors());
+
 
 app.use(express.json());
 app.use('/users', userRoutes);

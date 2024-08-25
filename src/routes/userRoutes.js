@@ -13,6 +13,9 @@ router.get('/', userController.getAllUsers);
 // Get user by ID
 router.get('/:id', userController.getUserById);
 
+// Get users by role
+router.get('/role/:role', userController.getUsersByRole);
+
 // Update a user
 router.put('/:id', userValidationRules(), validate, userController.updateUser);
 
