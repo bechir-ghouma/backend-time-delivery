@@ -7,11 +7,10 @@ const cors = require('cors'); // Import the cors package
 
 
 const app = express();
+app.use(express.json()); // This line is crucial
 
 app.use(cors());
 
-
-app.use(express.json());
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
 app.use('/line-orders', lineOrderRoutes);

@@ -1,11 +1,43 @@
 const userService = require('../services/userService');
+require('dotenv').config();
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 class UserController {
   async createUser(req, res) {
     try {
+      // Log to check if the file is processed
+      console.log('File received:', req.file);
+
+      if (req.file) {
+        // Check the file path
+        console.log('File stored at:', req.file.path);
+        req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
+        const path = `C:/salemketata/Freelance/DelevryFoodApp/frontend/EatTime/assets/images/${req.file.filename}`;
+        const results = await cloudinary.uploader.upload(path);
+        const url = cloudinary.url(results.public_id,{
+          transformation: [
+            {
+              quality: 'auto',
+              fetch_format: 'auto'
+            }
+          ]
+        });
+        req.body.image = url;
+      } else {
+        console.log('No file received');
+      }
+
       const user = await userService.createUser(req.body);
       res.status(201).json(user);
     } catch (err) {
+      console.error('Error creating user:', err);
       res.status(400).json({ error: err.message });
     }
   }
@@ -43,8 +75,17 @@ class UserController {
 
   async deleteUser(req, res) {
     try {
-      await userService.deleteUser(req.params.id);
-      res.status(204).json();
+      const user = await userService.deleteUser(req.params.id);
+      res.status(200).json(user); // You can return the updated user object if you want
+    } catch (err) {
+      res.status(404).json({ error: err.message });
+    }
+  }
+
+  async recoverUser(req, res) {
+    try {
+      const user = await userService.recoverUser(req.params.id);
+      res.status(200).json(user); // You can return the updated user object if you want
     } catch (err) {
       res.status(404).json({ error: err.message });
     }

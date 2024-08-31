@@ -26,7 +26,24 @@ class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-    await User.destroy({ where: { id: userId } });
+
+    // Instead of deleting, set the 'deleted' attribute to true
+    user.deleted = true;
+    await user.save();
+
+    return user;
+  }
+
+  async recoverUser(userId) {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Instead of deleting, set the 'deleted' attribute to true
+    user.deleted = false;
+    await user.save();
+
     return user;
   }
 

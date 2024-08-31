@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     first_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     last_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,
@@ -40,6 +40,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     vehicle: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    name_restaurant: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    deleted: {
+      type: DataTypes.BOOLEAN,
       allowNull: true,
     },
     role: {
