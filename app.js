@@ -4,6 +4,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const lineOrderRoutes = require('./src/routes/lineOrderRoutes');
 const cors = require('cors'); // Import the cors package
+const path = require('path');
 
 
 const app = express();
@@ -14,6 +15,8 @@ app.use(cors());
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
 app.use('/line-orders', lineOrderRoutes);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 3000;
 

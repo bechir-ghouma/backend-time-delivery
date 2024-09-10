@@ -13,6 +13,13 @@ class UserService {
     return User.findByPk(userId);
   }
 
+  // async updateUser(userId, userData) {
+  //   const [updated] = await User.update(userData, { where: { id: userId } });
+  //   if (updated) {
+  //     return this.getUserById(userId);
+  //   }
+  //   throw new Error('User not found');
+  // }
   async updateUser(userId, userData) {
     const [updated] = await User.update(userData, { where: { id: userId } });
     if (updated) {
@@ -20,6 +27,8 @@ class UserService {
     }
     throw new Error('User not found');
   }
+  
+
 
   async deleteUser(userId) {
     const user = await this.getUserById(userId);

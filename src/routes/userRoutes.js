@@ -4,11 +4,14 @@ const { userValidationRules, validate } = require('../validators/userValidator')
 const multer = require('multer');
 const path = require('path');
 
+
 const router = express.Router();
 
+
+// double check the destination
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const destPath = path.join('C:', 'salemketata', 'Freelance', 'DelevryFoodApp', 'frontend', 'EatTime', 'assets', 'images');
+        const destPath = path.join(__dirname,'C:/Users/Dell/OneDrive/Bureau/eatTime/frontend/EatTime/assets/images/');
         console.log('Destination Path:', destPath); // Log to verify
         cb(null, destPath);
     },
@@ -22,7 +25,9 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-}).single('image');
+  }).single('image');
+  
+  
 router.post('/', upload, userValidationRules(), validate, userController.createUser);
 
 
@@ -36,7 +41,8 @@ router.get('/:id', userController.getUserById);
 router.get('/role/:role', userController.getUsersByRole);
 
 // Update a user
-router.put('/:id', userValidationRules(), validate, userController.updateUser);
+// router.put('/:id', userValidationRules(), validate, userController.updateUser);
+router.put('/:id',upload, userController.updateUser);
 
 // Delete a user
 router.delete('/:id', userController.deleteUser);
