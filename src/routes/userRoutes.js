@@ -51,4 +51,7 @@ router.delete('/:id', userController.deleteUser);
 // Recover a user
 router.delete('/recover/:id', userController.recoverUser);
 
+router.post('/signin', userController.signIn);
+
+
 module.exports = router;

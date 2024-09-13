@@ -1,7 +1,10 @@
 const { User } = require('../../models');
+const bcrypt = require('bcrypt');
 
 class UserService {
   async createUser(userData) {
+    const saltRounds = 10; // You can adjust this number based on your security needs
+    userData.password = await bcrypt.hash(userData.password, saltRounds);
     return User.create(userData);
   }
 
@@ -58,6 +61,26 @@ class UserService {
 
   async getUsersByRole(role) {
     return User.findAll({ where: { role } });
+  }
+
+  async signIn(email, password) {
+    // Find the user by email and ensure the 'deleted' attribute is false
+    const user = await User.findOne({ where: { email, deleted: false } });
+    
+    if (!user) {
+      throw new Error('User not found or account has been deleted');
+    }
+
+    // Compare the provided password with the stored hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error('Invalid email or password');
+    }
+
+    // Authentication successful, return the user (you might want to exclude the password field)
+    const { password: _, ...userWithoutPassword } = user.dataValues;
+    return userWithoutPassword;
   }
 }
 

@@ -132,6 +132,19 @@ class UserController {
       res.status(500).json({ error: err.message });
     }
   }
+
+  async signIn(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      const user = await userService.signIn(email, password);
+
+      res.json(user);
+    } catch (err) {
+      console.error('Error during sign-in:', err);
+      res.status(400).json({ error: err.message });
+    }
+  }
 }
 
 module.exports = new UserController();
