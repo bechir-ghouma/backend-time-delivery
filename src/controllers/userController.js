@@ -22,7 +22,9 @@ class UserController {
         console.log('File stored at:', req.file.path);
         req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
         const path = `C:/salemketata/Freelance/DelevryFoodApp/frontend/EatTime/assets/images/${req.file.filename}`;
-        const results = await cloudinary.uploader.upload(path);
+        const results = await cloudinary.uploader.upload(path, {
+          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
+        });
         const url = cloudinary.url(results.public_id,{
           transformation: [
             {
