@@ -26,11 +26,25 @@ class MenuService {
   }
 
   async deleteMenu(id) {
-    const menu = await Menu.findByPk(id);
+    const menu = await this.getMenuById(id);
     if (!menu) {
       throw new Error('Menu not found');
     }
-    return await menu.destroy();
+    menu.deleted = true;
+    await menu.save();
+
+    return menu;
+  }
+
+  async recoverMenu(id) {
+    const menu = await this.getMenuById(id);
+    if (!menu) {
+      throw new Error('Menu not found');
+    }
+    menu.deleted = false;
+    await menu.save();
+
+    return menu;
   }
 }
 

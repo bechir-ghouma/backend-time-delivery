@@ -25,7 +25,7 @@ router.post('/', upload,MenuController.createMenu);
 router.get('/', MenuController.getAllMenus);
 router.get('/:id', MenuController.getMenuById);
 router.get('/category/:categoryId', MenuController.getMenusByCategory);
-router.put('/:id', MenuController.updateMenu);
+router.put('/:id', upload,MenuController.updateMenu);
 router.delete('/:id', MenuController.deleteMenu);
-
+router.delete('/recover/:id', MenuController.recoverMenu);
 module.exports = router;

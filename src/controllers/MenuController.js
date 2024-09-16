@@ -73,6 +73,28 @@ class MenuController {
 
   async updateMenu(req, res) {
     try {
+      console.log('File received:', req.file);
+
+      if (req.file) {
+        // Check the file path
+        console.log('File stored at:', req.file.path);
+        req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
+        const path = `C:/salemketata/Freelance/DelevryFoodApp/frontend/EatTime/assets/images/${req.file.filename}`;
+        const results = await cloudinary.uploader.upload(path, {
+          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
+        });
+        const url = cloudinary.url(results.public_id,{
+          transformation: [
+            {
+              quality: 'auto',
+              fetch_format: 'auto'
+            }
+          ]
+        });
+        req.body.image = url;
+      } else {
+        console.log('No file received');
+      }
       const menu = await MenuService.updateMenu(req.params.id, req.body);
       res.status(200).json(menu);
     } catch (error) {
@@ -83,6 +105,15 @@ class MenuController {
   async deleteMenu(req, res) {
     try {
       await MenuService.deleteMenu(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  async recoverMenu(req, res) {
+    try {
+      await MenuService.recoverMenu(req.params.id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: error.message });
