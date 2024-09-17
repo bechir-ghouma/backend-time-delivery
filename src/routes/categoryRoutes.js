@@ -42,4 +42,6 @@ router.put('/:id', CategoryController.updateCategory);
 // Route pour supprimer une catégorie
 router.delete('/:id', CategoryController.deleteCategory);
 
+router.delete('/recover/:id', CategoryController.recoverCategory);
+
 module.exports = router;

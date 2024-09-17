@@ -32,11 +32,25 @@ class CategoryService {
 
   // Supprimer une catégorie
   async deleteCategory(id) {
-    const category = await Category.findByPk(id);
+    const category = await this.getCategoryById(id);
     if (!category) {
       throw new Error('Category not found');
     }
-    return await category.destroy();
+    category.deleted = true;
+    await category.save();
+
+    return category;
+  }
+
+  async recoverCategory(id) {
+    const category = await this.getCategoryById(id);
+    if (!category) {
+      throw new Error('Category not found');
+    }
+    category.deleted = false;
+    await category.save();
+
+    return category;
   }
 }
 

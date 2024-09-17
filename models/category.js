@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id',
       },
     },
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,  // New attribute, with default value
+      allowNull: false,
+    },
   }, {
     timestamps: false,
   });
