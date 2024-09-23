@@ -44,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'id_category',
       as: 'category',
     });
+    Menu.hasMany(models.LineOrder, {
+      foreignKey: 'menu_id',
+      as: 'line_orders',
+    });
   };
 
   return Menu;

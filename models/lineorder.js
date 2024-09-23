@@ -13,9 +13,13 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id',
       },
     },
-    product: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    menu_id: {  // Remplace 'product' par 'menu_id'
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Menus',  // Fait référence au modèle 'Menu'
+        key: 'id',
+      },
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -33,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     LineOrder.belongsTo(models.Order, {
       foreignKey: 'order_id',
       as: 'order',
+    });
+    LineOrder.belongsTo(models.Menu, {
+      foreignKey: 'menu_id',
+      as: 'menu',
     });
   };
 

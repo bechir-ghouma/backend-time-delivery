@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     client_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'Users',
         key: 'id',
@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
     estimated_delivery_time: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    name_client: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   }, {
     timestamps: false  // Disable automatic timestamps
