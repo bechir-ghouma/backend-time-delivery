@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     name_client: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   }, {
     timestamps: false  // Disable automatic timestamps

@@ -84,6 +84,17 @@ class OrderController {
       res.status(500).json({ error: err.message });
     }
   }
+
+  async getOrdersByDeliveryPerson(req, res) {
+    try {
+      const { deliveryPersonId } = req.params;
+      console.log(deliveryPersonId);// Récupérer l'ID du livreur passé en paramètre
+      const orders = await orderService.getOrdersByDeliveryPerson(deliveryPersonId);
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  }
 }
 
 module.exports = new OrderController();

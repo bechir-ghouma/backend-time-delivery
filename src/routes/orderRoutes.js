@@ -12,4 +12,5 @@ router.get('/status/pending-and-preparing/:restaurant_id', orderController.getOr
 router.get('/restaurant/:restaurant_id', orderController.getOrdersByRestaurant);
 router.delete('/:id', orderController.deleteOrder);
 router.put('/:orderId/ready', orderController.markOrderAsReady);
+router.get('/delivery-person/:deliveryPersonId', orderController.getOrdersByDeliveryPerson);
 module.exports = router;

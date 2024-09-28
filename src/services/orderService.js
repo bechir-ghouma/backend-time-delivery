@@ -113,6 +113,36 @@ class OrderService {
       throw error;
     }
   }
+
+  async getOrdersByDeliveryPerson(deliveryPersonId = null) {
+    try {
+      const whereCondition = deliveryPersonId
+        ? { delivery_person_id: deliveryPersonId }
+        : { delivery_person_id: null };
+      console.log("service",deliveryPersonId);
+      const orders = await Order.findAll({
+        where: whereCondition,
+        include: [
+          {
+            model: User, // Inclure les informations du client
+            as: 'client',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+          },
+          {
+            model: User, // Inclure les informations du restaurant
+            as: 'restaurant',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+          },
+        ],
+      });
+
+      return orders;
+    } catch (error) {
+      console.error('Error fetching orders by delivery person:', error.message);
+    console.error('Stack:', error.stack);
+      throw error;
+    }
+  }
   
 }
 
