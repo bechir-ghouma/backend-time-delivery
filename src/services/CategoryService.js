@@ -1,4 +1,5 @@
-const { Category } = require('../../models');
+const { Category,Menu,User } = require('../../models');
+const { Op } = require('sequelize');
 
 class CategoryService {
   // Créer une nouvelle catégorie
@@ -51,6 +52,35 @@ class CategoryService {
     await category.save();
 
     return category;
+  }
+
+  async getCategoriesWithMenusByRestaurant(restaurantId) {
+    return await Category.findAll({
+      where: { id_restaurant: restaurantId },
+      include: [{
+        model: Menu,
+        as: 'menus', // Fetch associated menus
+        where: { deleted: false }, // Fetch only active menus (optional)
+        required: false, // Still fetch categories even if they don't have any menus
+      }],
+    });
+  }
+
+  async getRestaurantsByCategoryName(categoryName) {
+    return await User.findAll({
+      include: {
+        model: Category,
+        as: 'categories',
+        where: {
+          name: {
+            [Op.like]: `%${categoryName}%`, // Use 'LIKE' instead of 'ILIKE' for case-insensitive matching in MariaDB
+          },
+        },
+      },
+      where: {
+        role: 'Restaurant', // Ensure we only fetch restaurant users
+      },
+    });
   }
 }
 

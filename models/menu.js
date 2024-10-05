@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id',
       },
     },
+    promotion: {
+      type: DataTypes.INTEGER,  // Add promotion as an integer type
+      allowNull: true,          // Set to true if promotion is optional
+    },
     deleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,  // New attribute, with default value

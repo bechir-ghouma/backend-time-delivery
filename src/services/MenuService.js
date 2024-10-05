@@ -1,7 +1,9 @@
-const { Menu } = require('../../models');
+const { Menu,Category } = require('../../models');
+const { Op } = require('sequelize'); 
 
 class MenuService {
   async createMenu(data) {
+    console.log(data);
     return await Menu.create(data);
   }
 
@@ -45,6 +47,22 @@ class MenuService {
     await menu.save();
 
     return menu;
+  }
+
+  async getPromotionalMenusByRestaurant(restaurantId) {
+    return await Menu.findAll({
+      include: {
+        model: Category,
+        as: 'category',
+        where: { id_restaurant: restaurantId }, // Match categories for the specific restaurant
+      },
+      where: {
+        promotion: {
+          [Op.gt]: 0, // Sequelize operator to check promotion > 0
+        },
+        deleted: false, // Optional: Exclude deleted menus if needed
+      },
+    });
   }
 }
 

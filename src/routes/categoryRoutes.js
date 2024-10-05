@@ -36,6 +36,10 @@ router.get('/:id', CategoryController.getCategoryById);
 // Route pour récupérer les catégories d'un restaurant
 router.get('/restaurant/:restaurantId', CategoryController.getCategoriesByRestaurant);
 
+router.get('/restaurant/:restaurantId/with-menus', CategoryController.getCategoriesWithMenusByRestaurant);
+router.get('/restaurants/category/:categoryName', CategoryController.getRestaurantsByCategoryName);
+
+
 // Route pour mettre à jour une catégorie
 router.put('/:id', CategoryController.updateCategory);
 

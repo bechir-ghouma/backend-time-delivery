@@ -103,6 +103,25 @@ class CategoryController {
       res.status(500).json({ message: error.message });
     }
   }
+
+  async getCategoriesWithMenusByRestaurant(req, res) {
+    try {
+      console.log("idres",req.params.restaurantId);
+      const categories = await CategoryService.getCategoriesWithMenusByRestaurant(req.params.restaurantId);
+      res.status(200).json(categories);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  async getRestaurantsByCategoryName(req, res) {
+    try {
+      const { categoryName } = req.params; // Extract category name from request params
+      const restaurants = await CategoryService.getRestaurantsByCategoryName(categoryName);
+      res.status(200).json(restaurants);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new CategoryController();

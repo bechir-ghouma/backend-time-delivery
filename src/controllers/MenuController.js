@@ -119,6 +119,16 @@ class MenuController {
       res.status(500).json({ message: error.message });
     }
   }
+
+  async getPromotionalMenusByRestaurant(req, res) {
+    try {
+      const restaurantId = req.params.restaurantId;
+      const menus = await MenuService.getPromotionalMenusByRestaurant(restaurantId);
+      res.status(200).json(menus);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new MenuController();
