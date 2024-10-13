@@ -53,5 +53,9 @@ router.delete('/recover/:id', userController.recoverUser);
 
 router.post('/signin', userController.signIn);
 
+router.get('/search/restaurants/:nameRestaurant', userController.searchRestaurants);
+
+router.get('/restaurants/top-rated', userController.getTopRatedRestaurants);
+
 
 module.exports = router;

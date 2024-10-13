@@ -29,4 +29,7 @@ router.get('/restaurant/:restaurantId/promotions', MenuController.getPromotional
 router.put('/:id', upload,MenuController.updateMenu);
 router.delete('/:id', MenuController.deleteMenu);
 router.delete('/recover/:id', MenuController.recoverMenu);
+router.get('/restaurantsWithPromotions', MenuController.getRestaurantsWithPromotionalMenus);
+router.get('/search/:searchTerm', MenuController.searchMenus);
+
 module.exports = router;

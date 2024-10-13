@@ -129,6 +129,34 @@ class MenuController {
       res.status(500).json({ message: error.message });
     }
   }
+
+  async searchMenus(req, res) {
+    try {
+      const { searchTerm } = req.params; // Récupérer le terme de recherche depuis les paramètres
+      if (!searchTerm) {
+        return res.status(400).json({ message: 'Search term is required' });
+      }
+
+      const menus = await MenuService.searchMenusByName(searchTerm);
+      res.status(200).json(menus);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  async getRestaurantsWithPromotionalMenus(req, res) {
+    try {
+      const restaurants = await menuService.getRestaurantsWithPromotionalMenus();
+      console.log("resturants");
+      if (!restaurants || restaurants.length === 0) {
+        return res.status(404).json({ message: 'No restaurants with promotions found.' });
+      }
+      res.status(200).json(restaurants);
+    } catch (error) {
+      console.error('Error fetching restaurants with promotions:', error);
+      res.status(500).json({ message: 'An error occurred while fetching restaurants with promotions.' });
+    }
+  }
 }
 
 module.exports = new MenuController();

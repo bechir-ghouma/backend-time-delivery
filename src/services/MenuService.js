@@ -1,4 +1,4 @@
-const { Menu,Category } = require('../../models');
+const { Menu,Category,User } = require('../../models');
 const { Op } = require('sequelize'); 
 
 class MenuService {
@@ -63,6 +63,65 @@ class MenuService {
         deleted: false, // Optional: Exclude deleted menus if needed
       },
     });
+  }
+
+  async searchMenusByName(searchTerm) {
+    return Menu.findAll({
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          include: [
+            {
+              model: User,
+              as: 'restaurant',
+              attributes: ['id', 'name_restaurant'], // Inclure le nom du restaurant
+            }
+          ],
+          attributes: ['id', 'name'], // Inclure le nom de la catégorie
+        }
+      ],
+      where: {
+        name: { [Op.like]: `%${searchTerm}%` },  // Recherche par nom de menu uniquement
+        deleted: false, // Filtrer les menus non supprimés
+      },
+      attributes: ['id', 'name', 'description', 'image', 'price', 'promotion'], // Attributs à retourner
+    });
+  }
+
+  async getRestaurantsWithPromotionalMenus() {
+    try {
+      // Query the database for menus with promotions
+      const menus = await Menu.findAll({
+        include: [{
+          model: Category,
+          as: 'category',
+          include: [{
+            model: User,
+            as: 'restaurant',
+            attributes: ['id', 'name_restaurant'],  // Fetch restaurant name and ID
+          }],
+          attributes: ['id', 'name'],  // Fetch category name and ID
+        }],
+        where: {
+          promotion: { [Op.gt]: 0 },  // Fetch only menus with promotions
+          deleted: false,  // Ensure the menu is not deleted
+        },
+        attributes: [],  // We only need restaurant data, so we don't fetch menu attributes
+        group: ['category.id_restaurant'],  // Group by restaurant to avoid duplicates
+      });
+
+      // If no promotional menus are found, log and throw an error
+      if (!menus || menus.length === 0) {
+        console.log('No promotional menus found.');
+        throw new Error('Menu not found');
+      }
+
+      return menus;
+    } catch (error) {
+      console.error('Error fetching restaurants with promotional menus:', error);
+      throw error;
+    }
   }
 }
 

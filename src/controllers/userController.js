@@ -147,6 +147,29 @@ class UserController {
       res.status(400).json({ error: err.message });
     }
   }
+
+  async searchRestaurants(req, res) {
+    try {
+      const { nameRestaurant } = req.params; // Récupérer le nom du restaurant depuis req.params
+      if (!nameRestaurant) {
+        return res.status(400).json({ error: 'Restaurant name is required' });
+      }
+
+      const restaurants = await userService.searchRestaurantsByName(nameRestaurant);
+      res.status(200).json(restaurants);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  async getTopRatedRestaurants(req, res) {
+    try {
+      const restaurants = await userService.getTopRatedRestaurants();
+      res.status(200).json(restaurants);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new UserController();

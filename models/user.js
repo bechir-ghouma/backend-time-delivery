@@ -81,6 +81,20 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'id_restaurant',
       as: 'categories',
     });
+    User.belongsToMany(models.User, {
+      through: 'UserFavorites',
+      as: 'favoriteRestaurants',  // Alias for user's favorite restaurants
+      foreignKey: 'userId',
+      otherKey: 'restaurantId',
+    });
+
+    // A restaurant can be liked by multiple users (Clients)
+    User.belongsToMany(models.User, {
+      through: 'UserFavorites',
+      as: 'likedByUsers',  // Alias for users who liked the restaurant
+      foreignKey: 'restaurantId',
+      otherKey: 'userId',
+    });
   };
 
   return User;
