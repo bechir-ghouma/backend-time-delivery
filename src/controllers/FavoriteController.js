@@ -44,9 +44,7 @@ class FavoriteController {
       // Récupérer les restaurants favoris
       const favoriteRestaurants = await FavoriteService.getFavoriteRestaurants(userId);
 
-      if (!favoriteRestaurants) {
-        return res.status(404).json({ message: 'User not found or no favorites' });
-      }
+      
 
       res.status(200).json(favoriteRestaurants);
     } catch (error) {
