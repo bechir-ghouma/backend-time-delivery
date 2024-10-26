@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'Client',
     },
+    estimated_time: {  // New attribute
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: false  // Disable automatic timestamps
   });

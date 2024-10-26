@@ -145,6 +145,20 @@ class OrderService {
       throw error;
     }
   }
+
+  async getOrdersByClientId(clientId) {
+    return await Order.findAll({
+      where: {
+        client_id: clientId,
+      },
+      include: [
+        { model: User, as: 'client' },
+        { model: User, as: 'restaurant' },
+        { model: User, as: 'delivery_person' },
+        { model: LineOrder, as: 'lines_order' }, // Include line orders if necessary
+      ],
+    });
+  }
   
 }
 

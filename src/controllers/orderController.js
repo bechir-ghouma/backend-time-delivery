@@ -96,6 +96,22 @@ class OrderController {
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
   }
+
+  async getOrdersByClientId(req, res) {
+    const { client_id } = req.params; // Get the client ID from the request parameters
+  
+    try {
+      const orders = await orderService.getOrdersByClientId(client_id);
+      if (orders.length > 0) {
+        res.json(orders);
+      } else {
+        res.status(404).json({ error: 'No orders found for this client' });
+      }
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+  
 }
 
 module.exports = new OrderController();
