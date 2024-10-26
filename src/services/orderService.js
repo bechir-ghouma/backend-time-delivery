@@ -2,6 +2,8 @@ const { Order, LineOrder, User } = require('../../models');
 
 class OrderService {
   async createOrder(orderData, lineOrders) {
+    console.log("orderData",orderData);
+    console.log("lineOrders",lineOrders);
     let total = 0;
     if (lineOrders && lineOrders.length > 0) {
       total = lineOrders.reduce((acc, lineOrder) => {

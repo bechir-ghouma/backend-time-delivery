@@ -54,6 +54,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    ingredientExclure: { // New attribute for excluded ingredients
+      type: DataTypes.STRING,
+      allowNull: true, // Allow null if you don't want it to be mandatory
+    },
+    phone: { // New attribute for phone number
+      type: DataTypes.STRING,
+      allowNull: true, // Allow null if you don't want it to be mandatory
+    },
+    latitude: { // New attribute for latitude
+      type: DataTypes.DECIMAL(15, 10), // Store latitude as DECIMAL
+      allowNull: true, // Allow null if you don't want it to be mandatory
+    },
+    longitude: { // New attribute for longitude
+      type: DataTypes.DECIMAL(15, 10), // Store longitude as DECIMAL
+      allowNull: true, // Allow null if you don't want it to be mandatory
+    },
   }, {
     timestamps: false  // Disable automatic timestamps
   });
