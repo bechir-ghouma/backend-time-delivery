@@ -25,7 +25,6 @@ const ReclamationController = {
     }
   },
 
-  // Mettre à jour le statut d'une réclamation
   async updateReclamationStatus(req, res) {
     try {
       const { id } = req.params;

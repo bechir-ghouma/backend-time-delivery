@@ -13,7 +13,6 @@ router.get('/:id', ReclamationController.getReclamationsByClientId);
 // Mettre à jour le statut d'une réclamation
 router.put('/:id/status',  ReclamationController.updateReclamationStatus);
 
-// Supprimer une réclamation
 router.delete('/:id', ReclamationController.deleteReclamation);
 
 module.exports = router;

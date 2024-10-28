@@ -25,7 +25,6 @@ const ReclamationService = {
     return reclamation;
   },
 
-  // Supprimer une réclamation par ID
   async deleteReclamation(id) {
     const reclamation = await Reclamation.findByPk(id);
     if (!reclamation) throw new Error('Réclamation non trouvée');
