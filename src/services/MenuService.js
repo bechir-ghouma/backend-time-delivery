@@ -12,9 +12,22 @@ class MenuService {
   }
 
   async getMenuById(id) {
-    return await Menu.findByPk(id);
+    return await Menu.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          include: [
+            {
+              model: User,
+              as: 'restaurant',
+            },
+          ],
+        },
+      ],
+    });
   }
-
+  
   async getMenusByCategory(categoryId) {
     return await Menu.findAll({ where: { id_category: categoryId } });
   }
