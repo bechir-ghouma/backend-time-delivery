@@ -6,8 +6,8 @@ const ReclamationController = {
   // Créer une nouvelle réclamation
   async createReclamation(req, res) {
     try {
-      const { subject, description, clientId } = req.body;
-      const reclamation = await ReclamationService.createReclamation(clientId, subject, description);
+      const { subject, description, clientId,order_id,phone_number,name_restaurant } = req.body;
+      const reclamation = await ReclamationService.createReclamation(clientId, subject, description,order_id,phone_number,name_restaurant);
       res.status(201).json(reclamation);
     } catch (error) {
       res.status(500).json({ error: error.message });

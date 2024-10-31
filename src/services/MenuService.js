@@ -88,7 +88,6 @@ class MenuService {
             {
               model: User,
               as: 'restaurant',
-              attributes: ['id', 'name_restaurant'], // Inclure le nom du restaurant
             }
           ],
           attributes: ['id', 'name'], // Inclure le nom de la catégorie

@@ -28,6 +28,22 @@ module.exports = (sequelize, DataTypes) => {
           key: 'id',
         },
       },
+      name_restaurant: {  // New attribute for restaurant name
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      phone_number: {  // New attribute for phone number
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      order_id: {  // New foreign key for order
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Order',
+          key: 'id',
+        },
+      },
     }, {
       timestamps: false,  // Enables `createdAt` and `updatedAt` fields
     });
@@ -36,6 +52,10 @@ module.exports = (sequelize, DataTypes) => {
       Reclamation.belongsTo(models.User, {
         foreignKey: 'client_id',
         as: 'client',
+      });
+      Reclamation.belongsTo(models.Order, {
+        foreignKey: 'order_id',
+        as: 'order',
       });
     };
   

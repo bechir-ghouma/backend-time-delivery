@@ -4,8 +4,8 @@ const { Reclamation, User } = require('../../models');
 
 const ReclamationService = {
   // Créer une nouvelle réclamation
-  async createReclamation(clientId, subject, description) {
-    return await Reclamation.create({ client_id: clientId, subject, description });
+  async createReclamation(clientId, subject, description,order_id,phone_number,name_restaurant) {
+    return await Reclamation.create({ client_id: clientId, subject, description,order_id,phone_number,name_restaurant });
   },
 
   // Récupérer toutes les réclamations pour un client
