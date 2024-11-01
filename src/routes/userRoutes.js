@@ -57,5 +57,7 @@ router.get('/search/restaurants/:nameRestaurant', userController.searchRestauran
 
 router.get('/restaurants/top-rated', userController.getTopRatedRestaurants);
 
+router.post('/request-password-reset', userController.sendMailResetPassword);
+
 
 module.exports = router;

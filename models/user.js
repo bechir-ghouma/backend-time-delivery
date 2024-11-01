@@ -62,6 +62,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    verificationCodeExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    verificationCode : {
+      type: DataTypes.STRING,
+      allowNull: true,
+    }
   }, {
     timestamps: false  // Disable automatic timestamps
   });

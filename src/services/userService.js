@@ -1,6 +1,15 @@
 const { User } = require('../../models');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Utilisez votre service e-mail (ex. SendGrid, Mailgun, etc.)
+  auth: {
+      user: 'ketatasalem7@gmail.com', // Remplacez par votre e-mail
+      pass: 'ahan ygra ovgf tvtx' // Mot de passe de l'application
+  }
+});
 
 class UserService {
   async createUser(userData) {
@@ -108,6 +117,48 @@ class UserService {
       attributes: ['id', 'name_restaurant', 'address', 'average_raiting', 'image'], // Return necessary attributes
     });
   }
+
+  async sendPasswordResetEmail(email, verificationCode) {
+    try {
+        await transporter.sendMail({
+            from: 'ketatasalem7@gmail.com',
+            to: email,
+            subject: 'Code de réinitialisation de mot de passe',
+            text: `Votre code de réinitialisation de mot de passe est : ${verificationCode}. Ce code est valable pour 10 minutes.`,
+            html: `<p>Votre code de réinitialisation de mot de passe est : <b>${verificationCode}</b></p><p>Ce code est valable pour 10 minutes.</p>`
+        });
+        console.log('E-mail de réinitialisation envoyé');
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation:', error); // Full error log
+        throw new Error(`Impossible d'envoyer l'e-mail de réinitialisation: ${error.message}`);
+    }
+};
+
+
+  async resetPasswordSendingMail(email){
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+  }
+
+    // Générer un code de vérification et une date d'expiration
+    const verificationCode =  Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // expiration dans 10 minutes
+
+    // Enregistrer le code et l'expiration
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpiresAt = expiresAt;
+    await user.save();
+
+    // Envoyer l'e-mail avec le code
+    try {
+      await this.sendPasswordResetEmail(email, verificationCode);
+              console.log('Un code de réinitialisation a été envoyé à votre adresse e-mail.');
+    } catch (error) {
+      throw new Error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation');
+    }
+  }
+
 }
 
 module.exports = new UserService();

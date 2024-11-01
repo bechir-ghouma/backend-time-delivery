@@ -170,6 +170,16 @@ class UserController {
       res.status(500).json({ message: error.message });
     }
   }
+
+  async sendMailResetPassword(req,res){
+    try {
+      const { email } = req.body;
+      const reset = await userService.resetPasswordSendingMail(email);
+      res.json(reset);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = new UserController();
