@@ -59,5 +59,7 @@ router.get('/restaurants/top-rated', userController.getTopRatedRestaurants);
 
 router.post('/request-password-reset', userController.sendMailResetPassword);
 
+router.post('/verify-token', userController.verifyToken);
 
+router.post('/change-password', userController.changePassword);
 module.exports = router;

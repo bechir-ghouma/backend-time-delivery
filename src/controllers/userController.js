@@ -180,6 +180,28 @@ class UserController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async verifyToken(req, res) {
+    const { email, verificationCode } = req.body;
+
+    try {
+      const result = await userService.verifyToken(email, verificationCode);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async changePassword(req, res) {
+    const { email, newPassword } = req.body;
+
+    try {
+      const result = await userService.changePassword(email, newPassword);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = new UserController();

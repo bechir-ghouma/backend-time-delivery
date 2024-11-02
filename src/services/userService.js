@@ -158,7 +158,37 @@ class UserService {
       throw new Error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation');
     }
   }
+  async verifyToken(email, verificationCode) {
+    const user = await User.findOne({ where: { email, verificationCode } });
+    if (!user) {
+      throw new Error('Code de vérification incorrect ou utilisateur non trouvé');
+    }
 
+    // Check if the current time is greater than the expiration time
+    if (Date.now() > user.verificationCodeExpiresAt) {
+      throw new Error('Le code de vérification a expiré');
+    }
+
+    // Token is valid and not expired
+    return { message: 'Code de vérification valide' };
+  }
+
+  async changePassword(email, newPassword) {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return { message: 'Mot de passe mis à jour avec succès' };
+  }
 }
 
 module.exports = new UserService();
