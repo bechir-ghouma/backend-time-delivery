@@ -8,6 +8,7 @@ const menuRoutes  = require('./src/routes/menuRoutes');
 const favoritesRoutes  = require('./src/routes/favoritesRoutes');
 const reclamationsRoutes  = require('./src/routes/reclamationRoutes');
 const ratingRoutes  = require('./src/routes/ratingRoutes');
+const scheduleRoutes  = require('./src/routes/scheduleRoutes');
 const cors = require('cors'); // Import the cors package
 const path = require('path');
 
@@ -25,6 +26,7 @@ app.use('/menus', menuRoutes);
 app.use('/favorites', favoritesRoutes);
 app.use('/reclamations', reclamationsRoutes);
 app.use('/ratings', ratingRoutes);
+app.use('/schedule', scheduleRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 3000;

@@ -58,16 +58,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'Client',
     },
-    estimated_time: {  // New attribute
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     verificationCodeExpiresAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },
     verificationCode : {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    latitude: { // New attribute for latitude
+      type: DataTypes.DECIMAL(15, 10), // Store latitude as DECIMAL
+      allowNull: true,
+    },
+    longitude: { // New attribute for longitude
+      type: DataTypes.DECIMAL(15, 10), // Store longitude as DECIMAL
+      allowNull: true,
+    },
+    min_estimated_time: { // New attribute for minimum estimated time
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    max_estimated_time: { // New attribute for maximum estimated time
+      type: DataTypes.INTEGER,
       allowNull: true,
     }
   }, {
