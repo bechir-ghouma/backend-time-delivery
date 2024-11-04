@@ -1,4 +1,4 @@
-const { Order, LineOrder, User } = require('../../models');
+const { Order, LineOrder, User,Menu } = require('../../models');
 
 class OrderService {
   async createOrder(orderData, lineOrders) {
@@ -41,12 +41,21 @@ class OrderService {
   }
 
   async getOrderByIdWithLineOrders(orderId) {
-    return Order.findByPk(orderId, {
-      include: [{
-        model: LineOrder,
-        as: 'lines_order'
-      }]
-    });
+    try {
+      return await Order.findByPk(orderId, {
+        include: [{
+          model: LineOrder,
+          as: 'lines_order',
+          include: [{
+            model: Menu,
+            as: 'menu'
+          }]
+        }]
+      });
+    } catch (error) {
+      console.error("Error fetching order with line orders:", error);
+      throw error;
+    }
   }
 
   async deleteOrder(orderId) {
