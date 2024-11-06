@@ -189,6 +189,18 @@ class UserService {
 
     return { message: 'Mot de passe mis à jour avec succès' };
   }
+
+  async updateTarifRestaurant(userId, newTarif) {
+    const user = await this.getUserById(userId);
+    if (!user || user.role !== 'Restaurant') {
+      throw new Error("Restaurant non trouvé ou l'utilisateur n'a pas le rôle 'Restaurant'");
+    }
+
+    user.tarif_restaurant = newTarif;
+    await user.save();
+
+    return user; // retourne l'utilisateur mis à jour
+  }
 }
 
 module.exports = new UserService();

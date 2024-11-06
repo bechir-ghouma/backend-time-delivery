@@ -81,7 +81,11 @@ module.exports = (sequelize, DataTypes) => {
     max_estimated_time: { // New attribute for maximum estimated time
       type: DataTypes.INTEGER,
       allowNull: true,
-    }
+    },
+    tarif_restaurant: { // New attribute for restaurant rate
+      type: DataTypes.DECIMAL(10, 2), // Define DECIMAL with precision 10, scale 2
+      allowNull: true,
+    },
   }, {
     timestamps: false  // Disable automatic timestamps
   });

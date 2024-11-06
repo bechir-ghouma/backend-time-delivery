@@ -44,6 +44,7 @@ router.get('/role/:role', userController.getUsersByRole);
 // Update a user
 // router.put('/:id', userValidationRules(), validate, userController.updateUser);
 router.put('/:id',upload, userController.updateUser);
+router.put('/update-tarif-restaurant/:userId', userController.updateRestaurantTarif);
 
 // Delete a user
 router.delete('/:id', userController.deleteUser);

@@ -75,24 +75,7 @@ class UserController {
       console.log("id User:",req.params.id);
       console.log('Local time:', Date.now());
       console.log('UTC time (seconds):', Math.floor(Date.now() / 1000));
-      if (req.file) {
-        // Check the file path
-        console.log('File stored at:', req.file.path);
-        const path = `C:/salemketata/Freelance/DelevryFoodApp/frontend/EatTime/assets/images/${req.file.filename}`;
-        const results = await cloudinary.uploader.upload(path, {
-          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
-        });
-        const url = cloudinary.url(results.public_id,{
-          transformation: [
-            {
-              quality: 'auto',
-              fetch_format: 'auto'
-            }
-          ]
-        });
-        req.body.image = url;
-
-      }
+    
       
       const updatedUser = await userService.updateUser(req.params.id, {
         ...req.body,
@@ -198,6 +181,16 @@ class UserController {
     try {
       const result = await userService.changePassword(email, newPassword);
       res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async  updateRestaurantTarif(req, res) {
+    try {
+      const {newTarif } = req.body; // Assurez-vous que `userId` et `newTarif` sont transmis dans la requête
+      const updatedUser = await userService.updateTarifRestaurant(req.params.userId, newTarif);
+      res.status(200).json(updatedUser);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
