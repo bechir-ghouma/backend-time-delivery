@@ -1,10 +1,39 @@
 const orderService = require('../services/orderService');
+const { broadcast, notifyClient } = require('../../websocket');
 
 class OrderController {
+  // async createOrder(req, res) {
+  //   try {
+  //     console.log("body",req.body);
+  //     const order = await orderService.createOrder(req.body, req.body.lineOrders);
+  //     res.status(201).json(order);
+  //   } catch (err) {
+  //     res.status(400).json({ error: err.message });
+  //   }
+  // }
   async createOrder(req, res) {
     try {
-      console.log("body",req.body);
+      console.log("body", req.body);
       const order = await orderService.createOrder(req.body, req.body.lineOrders);
+      
+      // Broadcast the new order to all connected clients
+      broadcast({
+        type: 'NEW_ORDER',
+        payload: {
+          order,
+          restaurantId: order.restaurant_id, // Assuming this exists in your order object
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      // If you have a specific client/restaurant to notify
+      if (order.restaurant_id) {
+        notifyClient(order.restaurant_id.toString(), {
+          type: 'NEW_ORDER_FOR_RESTAURANT',
+          payload: order
+        });
+      }
+
       res.status(201).json(order);
     } catch (err) {
       res.status(400).json({ error: err.message });

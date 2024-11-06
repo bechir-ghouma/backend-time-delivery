@@ -1,6 +1,7 @@
 const express = require('express');
 const orderController = require('../controllers/orderController');
 const { orderValidationRules, validateOrder } = require('../validators/orderValidator');
+const { wss, notifyClient } = require('../../websocket');
 
 const router = express.Router();
 
