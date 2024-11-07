@@ -1,9 +1,10 @@
-// In your RestaurantHome component
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ noServer: true });
 
 const initializeWebSocket = async () => {
   const storedUserId = await AsyncStorage.getItem('id');
   // Replace with your actual server URL
-  const ws = new WebSocket(`ws://your-server-ip:3000/ws/${storedUserId}`);
+  const ws = new WebSocket(`ws://192.168.100.46:3000/ws/${storedUserId}`);
   
   ws.onopen = () => {
     console.log('WebSocket Connected');
@@ -64,6 +65,25 @@ const initializeWebSocket = async () => {
     // Attempt to reconnect after 5 seconds
     setTimeout(initializeWebSocket, 5000);
   };
+// Broadcast message to all connected clients
+function broadcast(data) {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+// Notify specific client by userId
+function notifyClient(userId, data) {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN && client.userId === userId) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+module.exports = { wss, broadcast, notifyClient };
 
   webSocketRef.current = ws;
 };
