@@ -4,7 +4,7 @@ const wss = new WebSocket.Server({ noServer: true });
 const initializeWebSocket = async () => {
   const storedUserId = await AsyncStorage.getItem('id');
   // Replace with your actual server URL
-  const ws = new WebSocket(`ws://192.168.100.46:3000/ws/${storedUserId}`);
+  const ws = new WebSocket(`ws://192.168.1.110:3000/ws/${storedUserId}`);
   
   ws.onopen = () => {
     console.log('WebSocket Connected');

@@ -15,5 +15,6 @@ router.delete('/:id', orderController.deleteOrder);
 router.put('/:orderId/ready', orderController.markOrderAsReady);
 router.get('/delivery-person/:deliveryPersonId', orderController.getOrdersByDeliveryPerson);
 router.get('/client/:client_id', orderController.getOrdersByClientId);
+router.post('/restaurant/:id_restaurant/orders-by-date', orderController.getOrdersByRestaurantAndDate);
 
 module.exports = router;

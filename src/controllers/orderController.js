@@ -135,7 +135,18 @@ class OrderController {
     }
   }
 
-  
+  async getOrdersByRestaurantAndDate(req, res) {
+    const { id_restaurant } = req.params;
+    const { date } = req.body;
+
+    try {
+      const orders = await orderService.getOrdersByRestaurantAndDate(id_restaurant, date);
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching orders by restaurant and date:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  }
   
 }
 
