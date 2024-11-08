@@ -1,14 +1,43 @@
 const { Order, LineOrder, User,Menu } = require('../../models');
 
 class OrderService {
+  // async createOrder(orderData, lineOrders) {
+  //   console.log("orderData",orderData);
+  //   console.log("lineOrders",lineOrders);
+  //   let total = 0;
+  //   if (lineOrders && lineOrders.length > 0) {
+  //     total = lineOrders.reduce((acc, lineOrder) => {
+  //       return acc + (lineOrder.quantity * lineOrder.unit_price);
+  //     }, 0);
+  //   }
+
+  //   orderData.total = total;
+
+  //   const transaction = await Order.sequelize.transaction();
+
+  //   try {
+  //     const order = await Order.create(orderData, { transaction });
+
+  //     if (lineOrders && lineOrders.length > 0) {
+  //       for (const lineOrderData of lineOrders) {
+  //         await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
+  //       }
+  //     }
+
+  //     await transaction.commit();
+  //     return order;
+  //   } catch (err) {
+  //     await transaction.rollback();
+  //     throw err;
+  //   }
+  // }
   async createOrder(orderData, lineOrders) {
-    console.log("orderData",orderData);
-    console.log("lineOrders",lineOrders);
+    console.log("Order data received:", orderData);
+    console.log("Line orders received:", lineOrders);
+
     let total = 0;
     if (lineOrders && lineOrders.length > 0) {
-      total = lineOrders.reduce((acc, lineOrder) => {
-        return acc + (lineOrder.quantity * lineOrder.unit_price);
-      }, 0);
+        total = lineOrders.reduce((acc, lineOrder) => acc + (lineOrder.quantity * lineOrder.unit_price), 0);
     }
 
     orderData.total = total;
@@ -16,21 +45,25 @@ class OrderService {
     const transaction = await Order.sequelize.transaction();
 
     try {
-      const order = await Order.create(orderData, { transaction });
+        const order = await Order.create(orderData, { transaction });
+        console.log("Order created:", order);
 
-      if (lineOrders && lineOrders.length > 0) {
-        for (const lineOrderData of lineOrders) {
-          await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
+        if (lineOrders && lineOrders.length > 0) {
+            for (const lineOrderData of lineOrders) {
+                await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
+                console.log("Line order created:", lineOrderData);
+            }
         }
-      }
 
-      await transaction.commit();
-      return order;
+        await transaction.commit();
+        return order;
     } catch (err) {
-      await transaction.rollback();
-      throw err;
+        console.error("Transaction error:", err);
+        await transaction.rollback();
+        throw err;
     }
-  }
+}
+
 
   async getAllOrders() {
     return Order.findAll();

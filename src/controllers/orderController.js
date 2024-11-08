@@ -1,5 +1,5 @@
 const orderService = require('../services/orderService');
-const { broadcast, notifyClient } = require('../../websocket');
+const { notifyClient } = require('../../websocket');
 
 class OrderController {
   // async createOrder(req, res) {
@@ -14,23 +14,12 @@ class OrderController {
   async createOrder(req, res) {
     try {
       const order = await orderService.createOrder(req.body, req.body.lineOrders);
-      
-      // Broadcast the new order to all clients or notify a specific client
-      broadcast({
-        type: 'NEW_ORDER',
-        payload: order
-      });
-
-      if (order.restaurant_id) {
-        notifyClient(order.restaurant_id.toString(), {
-          type: 'NEW_ORDER_FOR_RESTAURANT',
-          payload: order
-        });
-      }
-
+      const userId = order.client_id;
+      notifyClient(userId, { type: 'NEW_ORDER', order });
       res.status(201).json(order);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(400).json({ error: 'Error creating order' });
     }
   }
 

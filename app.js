@@ -51,13 +51,13 @@ const cors = require('cors'); // Import the cors package
 const path = require('path');
 const { createServer } = require('http');
 const WebSocket = require('ws');
-const http = require('http');
-const { broadcast, notifyClient } = require('./websocket');
+// const http = require('http');
+const { wss, notifyClient } = require('./websocket');
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 
-const wss = new WebSocket.Server({ noServer: true });;
+// const wss = new WebSocket.Server({ noServer: true });
 
 app.use(express.json());
 app.use(cors());
@@ -73,52 +73,7 @@ app.use('/ratings', ratingRoutes);
 app.use('/schedule', scheduleRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-wss.on('connection', (ws, req) => {
-  const userId = req.url.split('/').pop();
-  if (!userId) {
-    ws.close();
-    console.warn('Client attempted connection without user ID');
-    return;
-  }
-  console.log(`Client connected with ID: ${userId}`);
 
-  ws.userId = userId;
-  console.log(`WebSocket connected for user ${userId}`);
-
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      console.log('Received:', data);
-    } catch (error) {
-      console.error('Error processing message:', error);
-    }
-  });
-
-  ws.on('close', () => {
-    console.log(`Client disconnected: ${userId}`);
-  });
-
-  ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
-});
-
-// Helper function to send messages to specific clients
-// function notifyClient(userId, data) {
-//   wss.clients.forEach(client => {
-//     if (client.readyState === WebSocket.OPEN && client.userId === userId) {
-//       client.send(JSON.stringify(data));
-//     }
-//   });
-// }
-
-const sendToUser = (userId, data) => {
-  wss.clients.forEach((client) => {
-    if (client.userId === userId && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
-};
 
 // Export the sendToUser function so it can be used in your routes
 app.locals.sendToUser = notifyClient;
@@ -133,4 +88,4 @@ server.listen(3000, () => {
   console.log('Server listening on port 3000');
 });
 
-module.exports = { wss, notifyClient };
+module.exports = app;

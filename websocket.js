@@ -1,89 +1,44 @@
+// websocket.js
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ noServer: true });
 
-const initializeWebSocket = async () => {
-  const storedUserId = await AsyncStorage.getItem('id');
-  // Replace with your actual server URL
-  const ws = new WebSocket(`ws://192.168.100.46:3000/ws/${storedUserId}`);
-  
-  ws.onopen = () => {
-    console.log('WebSocket Connected');
-  };
+wss.on('connection', (ws, req) => {
+  const userId = req.url.split('/').pop();
+  if (!userId) {
+    ws.close();
+    console.warn('Client attempted connection without user ID');
+    return;
+  }
+  ws.userId = userId;
+  console.log(`WebSocket connected for user ${userId}`);
 
-  ws.onmessage = async (event) => {
+  ws.on('message', (message) => {
     try {
-      const data = JSON.parse(event.data);
-      console.log('Received WebSocket message:', data);
-      
-      if (data.type === 'NEW_ORDER') {
-        // Add new order to the beginning of the list
-        setPendingOrders(prevOrders => {
-          const newOrder = {
-            ...data.order,
-            isReady: false
-          };
-          
-          // Create new array with new order at the beginning
-          const updatedOrders = [newOrder, ...prevOrders];
-          return updatedOrders;
-        });
-
-        // Start ringing
-        await startRinging();
-
-        Alert.alert(
-          "Nouvelle Commande!",
-          `Commande #${data.order.id}\nClient: ${data.order.client?.first_name || data.order.name_client}`,
-          [
-            {
-              text: "Voir la commande",
-              onPress: () => {
-                stopRinging();
-                openOrderDetails(data.order);
-              },
-            },
-            {
-              text: "Plus tard",
-              onPress: () => stopRinging(),
-              style: "cancel"
-            },
-          ],
-          { cancelable: false }
-        );
-      }
+      const data = JSON.parse(message);
+      console.log('Received:', data);
     } catch (error) {
-      console.error('Error processing WebSocket message:', error);
-    }
-  };
-
-  ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
-  };
-
-  ws.onclose = () => {
-    console.log('WebSocket disconnected');
-    // Attempt to reconnect after 5 seconds
-    setTimeout(initializeWebSocket, 5000);
-  };
-// Broadcast message to all connected clients
-function broadcast(data) {
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
+      console.error('Error processing message:', error);
     }
   });
-}
 
-// Notify specific client by userId
-function notifyClient(userId, data) {
+  ws.on('close', () => console.log(`Client disconnected: ${userId}`));
+  ws.on('error', (error) => console.error('WebSocket error:', error));
+});
+
+const notifyClient = (userId, data) => {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN && client.userId === userId) {
       client.send(JSON.stringify(data));
     }
   });
-}
-
-module.exports = { wss, broadcast, notifyClient };
-
-  webSocketRef.current = ws;
 };
+
+const setupWebSocket = (server) => {
+  server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
+};
+
+module.exports = { wss, notifyClient, setupWebSocket };
