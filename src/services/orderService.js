@@ -1,4 +1,5 @@
 const { Order, LineOrder, User,Menu } = require('../../models');
+const { Op } = require('sequelize');
 
 class OrderService {
   // async createOrder(orderData, lineOrders) {
@@ -202,6 +203,37 @@ class OrderService {
     });
   }
   
+  async getOrdersByRestaurantAndDate(restaurantId, date) {
+    try {
+      const orders = await Order.findAll({
+        where: {
+          restaurant_id: restaurantId,
+          order_date: {
+            [Op.gte]: new Date(date).setHours(0, 0, 0, 0), // Start of the day
+            [Op.lt]: new Date(date).setHours(23, 59, 59, 999), // End of the day
+          },
+          status: {
+            [Op.ne]: 'Annulée', // Exclude orders with status "Annulée"
+          },
+        },
+        include: [
+          {
+            model: User,
+            as: 'client',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+          },
+          {
+            model: LineOrder,
+            as: 'lines_order',
+          },
+        ],
+      });
+      return orders;
+    } catch (error) {
+      console.error('Error fetching orders by restaurant and date:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new OrderService();
