@@ -1,8 +1,6 @@
 const express = require('express');
 const orderController = require('../controllers/orderController');
 const { orderValidationRules, validateOrder } = require('../validators/orderValidator');
-const { wss, notifyClient } = require('../../websocket');
-
 const router = express.Router();
 
 router.post('/', orderValidationRules(), validateOrder, orderController.createOrder);
@@ -16,5 +14,7 @@ router.put('/:orderId/ready', orderController.markOrderAsReady);
 router.get('/delivery-person/:deliveryPersonId', orderController.getOrdersByDeliveryPerson);
 router.get('/client/:client_id', orderController.getOrdersByClientId);
 router.post('/restaurant/:id_restaurant/orders-by-date', orderController.getOrdersByRestaurantAndDate);
+// New route for updating order status
+router.patch('/:orderId/status', orderController.updateOrderStatus);
 
 module.exports = router;

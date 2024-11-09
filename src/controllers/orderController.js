@@ -1,5 +1,5 @@
 const orderService = require('../services/orderService');
-const { notifyClient } = require('../../websocket');
+const { notifyClient, notifyRestaurant } = require('../../websocket');
 
 class OrderController {
   // async createOrder(req, res) {
@@ -14,8 +14,30 @@ class OrderController {
   async createOrder(req, res) {
     try {
       const order = await orderService.createOrder(req.body, req.body.lineOrders);
-      const userId = order.client_id;
-      notifyClient(userId, { type: 'NEW_ORDER', order });
+      
+      // Notify both client and restaurant
+      notifyClient('customer', order.client_id, {
+        type: 'NEW_ORDER',
+        order: {
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          created_at: order.created_at
+        }
+      });
+
+      notifyClient('restaurant', order.restaurant_id, {
+        type: 'NEW_ORDER',
+        order: {
+          id: order.id,
+          client_id: order.client_id,
+          items: order.lineOrders,
+          total: order.total,
+          status: order.status,
+          created_at: order.created_at
+        }
+      });
+
       res.status(201).json(order);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -68,12 +90,13 @@ class OrderController {
   }
 
   async getOrdersByStatusAndRestaurant(req, res) {
-    const { restaurant_id } = req.params; // Obtenir le restaurant_id depuis les paramètres de la requête
+    const { restaurant_id } = req.params;
 
     try {
       const orders = await orderService.getOrdersByStatusAndRestaurant(restaurant_id);
       res.json(orders);
     } catch (err) {
+      console.error("Error fetching orders by status:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -88,23 +111,55 @@ class OrderController {
     }
   }
 
+  // async markOrderAsReady(req, res) {
+  //   try {
+  //     const { orderId } = req.params; // Récupérer l'ID de la commande depuis les paramètres de l'URL
+  //     const updatedOrder = await orderService.updateOrderStatusToReady(orderId);
+  //     res.json(updatedOrder);
+  //   } catch (err) {
+  //     res.status(500).json({ error: err.message });
+  //   }
+  // }
   async markOrderAsReady(req, res) {
     try {
-      const { orderId } = req.params; // Récupérer l'ID de la commande depuis les paramètres de l'URL
+      const { orderId } = req.params;
       const updatedOrder = await orderService.updateOrderStatusToReady(orderId);
+      
+      // Notify client that order is ready
+      notifyClient('customer', updatedOrder.client_id, {
+        type: 'ORDER_READY',
+        order: {
+          id: updatedOrder.id,
+          status: updatedOrder.status,
+          ready_at: new Date()
+        }
+      });
+
+      // Also notify delivery person if assigned
+      if (updatedOrder.delivery_person_id) {
+        notifyClient('delivery', updatedOrder.delivery_person_id, {
+          type: 'ORDER_READY_FOR_PICKUP',
+          order: {
+            id: updatedOrder.id,
+            restaurant_id: updatedOrder.restaurant_id,
+            status: updatedOrder.status
+          }
+        });
+      }
+
       res.json(updatedOrder);
     } catch (err) {
+      console.error("Error marking order as ready:", err);
       res.status(500).json({ error: err.message });
     }
   }
-
   async getOrdersByDeliveryPerson(req, res) {
     try {
       const { deliveryPersonId } = req.params;
-      console.log(deliveryPersonId);// Récupérer l'ID du livreur passé en paramètre
       const orders = await orderService.getOrdersByDeliveryPerson(deliveryPersonId);
       res.status(200).json(orders);
     } catch (error) {
+      console.error("Error fetching delivery person orders:", error);
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
   }
@@ -134,6 +189,70 @@ class OrderController {
     } catch (error) {
       console.error('Error fetching orders by restaurant and date:', error);
       res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  }
+  // Add method to update order status with notifications
+  async updateOrderStatus(req, res) {
+    try {
+      const { orderId } = req.params;
+      const { status } = req.body;
+      
+      const updatedOrder = await orderService.updateOrderStatus(orderId, status);
+      
+      // Notify all relevant parties about status change
+      const notifications = {
+        'PREPARING': {
+          client: 'ORDER_PREPARING',
+          restaurant: 'ORDER_IN_PREPARATION'
+        },
+        'READY': {
+          client: 'ORDER_READY',
+          delivery: 'ORDER_READY_FOR_PICKUP'
+        },
+        'DELIVERED': {
+          client: 'ORDER_DELIVERED',
+          restaurant: 'ORDER_COMPLETED'
+        }
+      };
+
+      if (notifications[status]) {
+        // Notify client
+        notifyClient('customer', updatedOrder.client_id, {
+          type: notifications[status].client,
+          order: {
+            id: updatedOrder.id,
+            status: status,
+            updated_at: new Date()
+          }
+        });
+
+        // Notify restaurant
+        notifyClient('restaurant', updatedOrder.restaurant_id, {
+          type: notifications[status].restaurant,
+          order: {
+            id: updatedOrder.id,
+            status: status,
+            updated_at: new Date()
+          }
+        });
+
+        // Notify delivery person if assigned
+        if (updatedOrder.delivery_person_id && notifications[status].delivery) {
+          notifyClient('delivery', updatedOrder.delivery_person_id, {
+            type: notifications[status].delivery,
+            order: {
+              id: updatedOrder.id,
+              status: status,
+              updated_at: new Date()
+            }
+          });
+        }
+      }
+
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ error: 'Failed to update order status' });
     }
   }
   
