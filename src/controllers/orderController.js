@@ -13,6 +13,42 @@ class OrderController {
   // }
   async createOrder(req, res) {
     try {
+      const orders = await orderService.createOrder(req.body, req.body.lineOrders);
+
+      // Notifier le client une seule fois
+      if (orders.length > 0) {
+          notifyClient('customer', orders[0].client_id, {
+              type: 'NEW_ORDER',
+              orders: orders.map(order => ({
+                  id: order.id,
+                  status: order.status,
+                  total: order.total,
+                  created_at: order.created_at,
+              }))
+          });
+      }
+
+      // Notifier chaque restaurant pour chaque ordre créé
+      orders.forEach(order => {
+          notifyClient('restaurant', order.restaurant_id, {
+              type: 'NEW_ORDER',
+              order: {
+                  id: order.id,
+                  client_id: order.client_id,
+                  items: order.lineOrders,
+                  total: order.total,
+                  status: order.status,
+                  created_at: order.created_at,
+              }
+          });
+      });
+
+      res.status(201).json(orders);
+  } catch (error) {
+      console.error("Error creating grouped orders:", error);
+      res.status(400).json({ error: 'Error creating grouped orders' });
+  }
+    /*try {
       const order = await orderService.createOrder(req.body, req.body.lineOrders);
       
       // Notify both client and restaurant
@@ -42,7 +78,7 @@ class OrderController {
     } catch (error) {
       console.error("Error creating order:", error);
       res.status(400).json({ error: 'Error creating order' });
-    }
+    }*/
   }
 
   async getAllOrders(req, res) {

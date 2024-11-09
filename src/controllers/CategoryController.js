@@ -108,6 +108,7 @@ class CategoryController {
     try {
       console.log("idres",req.params.restaurantId);
       const categories = await CategoryService.getCategoriesWithMenusByRestaurant(req.params.restaurantId);
+      console.log("categories",categories);
       res.status(200).json(categories);
     } catch (error) {
       res.status(500).json({ message: error.message });

@@ -2,7 +2,6 @@ const { check, validationResult } = require('express-validator');
 
 const orderValidationRules = () => {
   return [
-    check('restaurant_id').isInt().withMessage('Restaurant ID must be an integer'),
     check('status').notEmpty().withMessage('Status is required'),
     check('delivery_address').notEmpty().withMessage('Delivery address is required')
   ];

@@ -1,4 +1,4 @@
-const { Order, LineOrder, User,Menu } = require('../../models');
+const { Order, LineOrder, User,Menu,Category } = require('../../models');
 const { Op } = require('sequelize');
 
 class OrderService {
@@ -33,7 +33,68 @@ class OrderService {
   //   }
   // }
   async createOrder(orderData, lineOrders) {
-    console.log("Order data received:", orderData);
+
+      console.log("Order data received:", orderData);
+      console.log("Line orders received:", lineOrders);
+  
+      const lineOrdersByRestaurant = {};
+  
+      // Charger les menus associés pour obtenir les restaurant_id
+      for (const lineOrder of lineOrders) {
+          const menu = await Menu.findByPk(lineOrder.menu_id, {
+              include: [{
+                  model: Category,
+                  as: 'category',
+                  attributes: ['id', 'id_restaurant'] // Inclut le restaurant_id via la catégorie
+              }]
+          });
+  
+          if (menu && menu.category) {
+              const restaurantId = menu.category.id_restaurant;
+              if (!lineOrdersByRestaurant[restaurantId]) {
+                  lineOrdersByRestaurant[restaurantId] = [];
+              }
+              // Ajouter le lineOrder dans le bon groupe de restaurant
+              lineOrdersByRestaurant[restaurantId].push(lineOrder);
+          }
+      }
+  
+      const createdOrders = [];
+  
+      // Parcourir chaque groupe par restaurant et créer un ordre
+      for (const [restaurantId, restaurantLineOrders] of Object.entries(lineOrdersByRestaurant)) {
+          let total = restaurantLineOrders.reduce((acc, lineOrder) => acc + (lineOrder.quantity * lineOrder.unit_price), 0);
+          const newOrderData = {
+              ...orderData,
+              restaurant_id: restaurantId,
+              total: total,
+          };
+  
+          const transaction = await Order.sequelize.transaction();
+  
+          try {
+              // Créer l'ordre pour ce restaurant
+              const order = await Order.create(newOrderData, { transaction });
+              console.log("Order created for restaurant:", restaurantId);
+  
+              // Créer chaque lineOrder pour cet ordre
+              for (const lineOrderData of restaurantLineOrders) {
+                  await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
+                  console.log("Line order created:", lineOrderData);
+              }
+  
+              await transaction.commit();
+              createdOrders.push(order);
+          } catch (err) {
+              console.error("Transaction error:", err);
+              await transaction.rollback();
+              throw err;
+          }
+      }
+  
+      return createdOrders;
+  
+   /* console.log("Order data received:", orderData);
     console.log("Line orders received:", lineOrders);
 
     let total = 0;
@@ -62,7 +123,7 @@ class OrderService {
         console.error("Transaction error:", err);
         await transaction.rollback();
         throw err;
-    }
+    }*/
 }
 
 
