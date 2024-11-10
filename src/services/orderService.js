@@ -222,30 +222,33 @@ class OrderService {
 
   async getOrdersByDeliveryPerson(deliveryPersonId = null) {
     try {
-      const whereCondition = deliveryPersonId
-        ? { delivery_person_id: deliveryPersonId }
-        : { delivery_person_id: null };
-      console.log("service",deliveryPersonId);
+      const whereCondition = {
+        delivery_person_id: {
+          [Op.or]: [deliveryPersonId, null]
+        }
+      };
+      console.log("service", deliveryPersonId);
+  
       const orders = await Order.findAll({
         where: whereCondition,
         include: [
           {
-            model: User, // Inclure les informations du client
+            model: User, // Include client information
             as: 'client',
             attributes: ['id', 'first_name', 'last_name', 'email'],
           },
           {
-            model: User, // Inclure les informations du restaurant
+            model: User, // Include restaurant information
             as: 'restaurant',
-            attributes: ['id', 'first_name', 'last_name', 'email'],
+            attributes: ['id', 'first_name', 'last_name', 'email','latitude','longitude'],
           },
         ],
       });
-
+  
       return orders;
     } catch (error) {
       console.error('Error fetching orders by delivery person:', error.message);
-    console.error('Stack:', error.stack);
+      console.error('Stack:', error.stack);
       throw error;
     }
   }
