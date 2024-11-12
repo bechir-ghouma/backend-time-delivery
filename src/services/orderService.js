@@ -298,6 +298,74 @@ class OrderService {
       throw error;
     }
   }
+
+  async getPendingOrders() {
+    try {
+      const pendingOrders = await Order.findAll({
+        where: {
+          status: 'En Attente', // Filtrer les commandes avec statut "En Attente"
+        },
+        include: [
+          {
+            model: LineOrder,
+            as: 'lines_order', // Inclure les lignes de commande associées
+            include: [
+              {
+                model: Menu,
+                as: 'menu', // Inclure les informations du menu pour chaque ligne de commande
+              },
+            ],
+          },
+          {
+            model: User,
+            as: 'client', // Inclure les informations du client
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+          },
+          {
+            model: User,
+            as: 'restaurant', // Inclure les informations du restaurant
+            attributes: ['id', 'name_restaurant', 'email', 'latitude', 'longitude'],
+          },
+          {
+            model: User,
+            as: 'delivery_person', // Inclure les informations du livreur
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+          },
+        ],
+      });
+  
+      return pendingOrders;
+    } catch (error) {
+      console.error('Error fetching pending orders:', error);
+      throw error;
+    }
+  }
+  
+  async assignOrderToDeliveryPerson(orderId, deliveryPersonId) {
+    try {
+      // Récupérer la commande par son ID
+      const order = await Order.findByPk(orderId);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+  
+      // Vérifier si le livreur existe
+      const deliveryPerson = await User.findByPk(deliveryPersonId);
+      if (!deliveryPerson) {
+        throw new Error('Delivery person not found');
+      }
+  
+      // Assigner le livreur à la commande
+      order.delivery_person_id = deliveryPersonId;
+      await order.save();
+  
+      return order;
+    } catch (error) {
+      console.error('Error assigning order to delivery person:', error);
+      throw error;
+    }
+  }
+  
 }
 
 module.exports = new OrderService();

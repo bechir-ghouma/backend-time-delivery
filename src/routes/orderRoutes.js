@@ -3,6 +3,9 @@ const orderController = require('../controllers/orderController');
 const { orderValidationRules, validateOrder } = require('../validators/orderValidator');
 const router = express.Router();
 
+
+router.get('/pending', orderController.getPendingOrders);
+router.put('/:orderId/assign/:deliveryPersonId', orderController.assignOrderToDeliveryPerson);
 router.post('/', orderValidationRules(), validateOrder, orderController.createOrder);
 router.get('/', orderController.getAllOrders);
 router.get('/:id', orderController.getOrderById);

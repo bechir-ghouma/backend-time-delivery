@@ -292,6 +292,27 @@ class OrderController {
     }
   }
   
+  async getPendingOrders(req, res) {
+    try {
+      const orders = await orderService.getPendingOrders();
+      res.status(200).json(orders);
+    } catch (error) {
+      console.error("Error fetching  orders:", error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  }
+
+  async assignOrderToDeliveryPerson(req, res) {
+    const { orderId, deliveryPersonId } = req.params;
+
+    try {
+      const updatedOrder = await orderService.assignOrderToDeliveryPerson(orderId, deliveryPersonId);
+      res.status(200).json(updatedOrder);
+    } catch (error) {
+      console.error('Error assigning order to delivery person:', error);
+      res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new OrderController();
