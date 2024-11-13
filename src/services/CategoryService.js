@@ -14,8 +14,15 @@ class CategoryService {
 
   // Récupérer une catégorie par ID
   async getCategoryById(id) {
-    return await Category.findByPk(id);
+    return await Category.findByPk(id, {
+      include: [{
+        model: User,
+        as: 'restaurant', // Assurez-vous que l'association 'restaurant' est définie dans votre modèle
+        attributes: ['id', 'name_restaurant', 'email', 'latitude', 'longitude','tarif_restaurant'], // Inclure les informations nécessaires du restaurant
+      }],
+    });
   }
+  
 
   // Récupérer toutes les catégories d'un restaurant
   async getCategoriesByRestaurant(restaurantId) {
