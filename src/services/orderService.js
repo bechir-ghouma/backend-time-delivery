@@ -2,50 +2,19 @@ const { Order, LineOrder, User,Menu,Category } = require('../../models');
 const { Op } = require('sequelize');
 
 class OrderService {
-  // async createOrder(orderData, lineOrders) {
-  //   console.log("orderData",orderData);
-  //   console.log("lineOrders",lineOrders);
-  //   let total = 0;
-  //   if (lineOrders && lineOrders.length > 0) {
-  //     total = lineOrders.reduce((acc, lineOrder) => {
-  //       return acc + (lineOrder.quantity * lineOrder.unit_price);
-  //     }, 0);
-  //   }
-
-  //   orderData.total = total;
-
-  //   const transaction = await Order.sequelize.transaction();
-
-  //   try {
-  //     const order = await Order.create(orderData, { transaction });
-
-  //     if (lineOrders && lineOrders.length > 0) {
-  //       for (const lineOrderData of lineOrders) {
-  //         await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
-  //       }
-  //     }
-
-  //     await transaction.commit();
-  //     return order;
-  //   } catch (err) {
-  //     await transaction.rollback();
-  //     throw err;
-  //   }
-  // }
   async createOrder(orderData, lineOrders) {
 
       console.log("Order data received:", orderData);
       console.log("Line orders received:", lineOrders);
   
       const lineOrdersByRestaurant = {};
-  
       // Charger les menus associés pour obtenir les restaurant_id
       for (const lineOrder of lineOrders) {
           const menu = await Menu.findByPk(lineOrder.menu_id, {
               include: [{
                   model: Category,
                   as: 'category',
-                  attributes: ['id', 'id_restaurant'] // Inclut le restaurant_id via la catégorie
+                  attributes: ['id', 'id_restaurant'] 
               }]
           });
   
@@ -93,37 +62,6 @@ class OrderService {
       }
   
       return createdOrders;
-  
-   /* console.log("Order data received:", orderData);
-    console.log("Line orders received:", lineOrders);
-
-    let total = 0;
-    if (lineOrders && lineOrders.length > 0) {
-        total = lineOrders.reduce((acc, lineOrder) => acc + (lineOrder.quantity * lineOrder.unit_price), 0);
-    }
-
-    orderData.total = total;
-
-    const transaction = await Order.sequelize.transaction();
-
-    try {
-        const order = await Order.create(orderData, { transaction });
-        console.log("Order created:", order);
-
-        if (lineOrders && lineOrders.length > 0) {
-            for (const lineOrderData of lineOrders) {
-                await LineOrder.create({ ...lineOrderData, order_id: order.id }, { transaction });
-                console.log("Line order created:", lineOrderData);
-            }
-        }
-
-        await transaction.commit();
-        return order;
-    } catch (err) {
-        console.error("Transaction error:", err);
-        await transaction.rollback();
-        throw err;
-    }*/
 }
 
 
