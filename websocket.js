@@ -106,6 +106,14 @@ const notifyRestaurant = (restaurantId, orderData) => {
     order: orderData
   });
 };
+// Notify livreur about new order
+const notifyLivreur = (delivery_person_id, orderData) => {
+  return notifyClient('delivery_person', delivery_person_id, {
+    type: 'newOrder',
+    timestamp: Date.now(),
+    order: orderData
+  });
+};
 
 // Notify customer about order status
 const notifyCustomer = (customerId, orderData) => {
@@ -144,6 +152,7 @@ module.exports = {
   wss,
   notifyClient,
   notifyRestaurant,
+  notifyLivreur,
   notifyCustomer,
   setupWebSocket
 };

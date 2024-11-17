@@ -2,15 +2,6 @@ const orderService = require('../services/orderService');
 const { notifyClient, notifyRestaurant } = require('../../websocket');
 
 class OrderController {
-  // async createOrder(req, res) {
-  //   try {
-  //     console.log("body",req.body);
-  //     const order = await orderService.createOrder(req.body, req.body.lineOrders);
-  //     res.status(201).json(order);
-  //   } catch (err) {
-  //     res.status(400).json({ error: err.message });
-  //   }
-  // }
   async createOrder(req, res) {
     try {
       const orders = await orderService.createOrder(req.body, req.body.lineOrders);
@@ -42,43 +33,25 @@ class OrderController {
               }
           });
       });
+      orders.forEach(order => {
+        notifyClient('livreur', order.restaurant_id, {
+            type: 'NEW_ORDER',
+            order: {
+                id: order.id,
+                client_id: order.client_id,
+                items: order.lineOrders,
+                total: order.total,
+                status: order.status,
+                created_at: order.order_date,
+            }
+        });
+    });
 
       res.status(201).json(orders);
   } catch (error) {
       console.error("Error creating grouped orders:", error);
       res.status(400).json({ error: 'Error creating grouped orders' });
   }
-    /*try {
-      const order = await orderService.createOrder(req.body, req.body.lineOrders);
-      
-      // Notify both client and restaurant
-      notifyClient('customer', order.client_id, {
-        type: 'NEW_ORDER',
-        order: {
-          id: order.id,
-          status: order.status,
-          total: order.total,
-          created_at: order.created_at
-        }
-      });
-
-      notifyClient('restaurant', order.restaurant_id, {
-        type: 'NEW_ORDER',
-        order: {
-          id: order.id,
-          client_id: order.client_id,
-          items: order.lineOrders,
-          total: order.total,
-          status: order.status,
-          created_at: order.created_at
-        }
-      });
-
-      res.status(201).json(order);
-    } catch (error) {
-      console.error("Error creating order:", error);
-      res.status(400).json({ error: 'Error creating order' });
-    }*/
   }
 
   async getAllOrders(req, res) {
@@ -146,16 +119,6 @@ class OrderController {
       res.status(500).json({ error: err.message });
     }
   }
-
-  // async markOrderAsReady(req, res) {
-  //   try {
-  //     const { orderId } = req.params; // Récupérer l'ID de la commande depuis les paramètres de l'URL
-  //     const updatedOrder = await orderService.updateOrderStatusToReady(orderId);
-  //     res.json(updatedOrder);
-  //   } catch (err) {
-  //     res.status(500).json({ error: err.message });
-  //   }
-  // }
   async markOrderAsReady(req, res) {
     try {
       const { orderId } = req.params;
@@ -170,7 +133,6 @@ class OrderController {
           ready_at: new Date()
         }
       });
-
       // Also notify delivery person if assigned
       if (updatedOrder.delivery_person_id) {
         notifyClient('delivery', updatedOrder.delivery_person_id, {
@@ -272,10 +234,20 @@ class OrderController {
           }
         });
 
+        // Notify el livreur ki yji order
+        notifyClient('livreur', updatedOrder.delivery_person_id, {
+          type: notifications[status].delivery,
+          order: {
+            id: updatedOrder.id,
+            status: status,
+            updated_at: new Date()
+          }
+        });        
+
         // Notify delivery person if assigned
         if (updatedOrder.delivery_person_id && notifications[status].delivery) {
           notifyClient('delivery', updatedOrder.delivery_person_id, {
-            type: notifications[status].delivery,
+            type: notifications[status].delivery_person,
             order: {
               id: updatedOrder.id,
               status: status,
