@@ -70,6 +70,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(15, 10), // Store longitude as DECIMAL
       allowNull: true, // Allow null if you don't want it to be mandatory
     },
+    tarif_livraison: { // Nouveau champ pour tarif de livraison
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true, // Optionnel, selon vos besoins
+    },
   }, {
     timestamps: false  // Disable automatic timestamps
   });

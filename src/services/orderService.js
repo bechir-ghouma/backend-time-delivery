@@ -1,5 +1,6 @@
 const { Order, LineOrder, User,Menu,Category } = require('../../models');
 const { Op } = require('sequelize');
+const userService = require('./userService');
 
 class OrderService {
   // async createOrder(orderData, lineOrders) {
@@ -64,10 +65,18 @@ class OrderService {
       // Parcourir chaque groupe par restaurant et créer un ordre
       for (const [restaurantId, restaurantLineOrders] of Object.entries(lineOrdersByRestaurant)) {
           let total = restaurantLineOrders.reduce((acc, lineOrder) => acc + (lineOrder.quantity * lineOrder.unit_price), 0);
+          // Récupérer tarif_restaurant du restaurant
+        const restaurant = await userService.getUserById(restaurantId); // Suppose que vous avez un modèle Restaurant
+        console.log("restuarant with tarif",restaurant);
+        if (!restaurant) {
+            throw new Error(`Restaurant with ID ${restaurantId} not found`);
+        }
+        const tarifRestaurant = restaurant.tarif_restaurant;
           const newOrderData = {
               ...orderData,
               restaurant_id: restaurantId,
               total: total,
+              tarif_livraison: parseFloat(tarifRestaurant),
           };
   
           const transaction = await Order.sequelize.transaction();
