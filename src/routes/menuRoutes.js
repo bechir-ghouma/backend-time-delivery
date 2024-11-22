@@ -5,7 +5,7 @@ const path = require('path');
 const router = express.Router();
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const destPath = path.join('C:', 'salemketata', 'Freelance', 'DelevryFoodApp', 'frontend', 'EatTime', 'assets', 'images');
+        const destPath = path.join('C:', 'Users', 'Dell','OneDrive','Bureau', 'eat11.16', 'frontend', 'EatTime', 'assets', 'images');
         console.log('Destination Path:', destPath); // Log to verify
         cb(null, destPath);
 
