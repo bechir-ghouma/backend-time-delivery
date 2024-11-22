@@ -19,7 +19,7 @@ class CategoryController {
         // Check the file path
         console.log('File stored at:', req.file.path);
         req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
-        const path = `C:/salemketata/Freelance/DelevryFoodApp/frontend/EatTime/assets/images/${req.file.filename}`;
+        const path = `C:C:/Users/Dell/OneDrive/Bureau/eat11.16/frontend/EatTime/assets/images/${req.file.filename}`;
         const results = await cloudinary.uploader.upload(path, {
           timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
         });
