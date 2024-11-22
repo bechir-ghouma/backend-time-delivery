@@ -2,7 +2,8 @@ const { User } = require('../../models');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
 const nodemailer = require('nodemailer');
-
+const RegularScheduleService = require('./RegularScheduleService');
+const EmergencyClosureService = require('./EmergencyClosureService');
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Utilisez votre service e-mail (ex. SendGrid, Mailgun, etc.)
   auth: {
@@ -70,7 +71,27 @@ class UserService {
   }
 
   async getUsersByRole(role) {
-    return User.findAll({ where: { role } });
+    // Récupérer les utilisateurs par rôle
+    const users = await User.findAll({ where: { role } });
+
+    // Si le rôle est 'Restaurant', ajouter les schedules réguliers et urgences
+    if (role === 'Restaurant') {
+      for (const user of users) {
+        const restaurantId = user.id;
+
+        // Récupérer le schedule régulier
+        const regularSchedule = await RegularScheduleService.getSchedule(restaurantId);
+
+        // Récupérer le schedule d'urgence
+        const emergencyClosure = await EmergencyClosureService.getEmergencyClosure(restaurantId);
+
+        // Ajouter les schedules aux données utilisateur
+        user.dataValues.regularSchedule = regularSchedule;
+        user.dataValues.emergencyClosure = emergencyClosure;
+      }
+    }
+
+    return users;
   }
 
   async signIn(email, password) {

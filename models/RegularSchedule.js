@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      date: {
+        type: DataTypes.DATEONLY, // Format YYYY-MM-DD
+        allowNull: true, // Peut être optionnel
+    },
     }, {
         timestamps: false,  // Enables `createdAt` and `updatedAt` fields
       });
