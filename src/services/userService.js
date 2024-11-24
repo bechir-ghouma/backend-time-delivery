@@ -75,7 +75,7 @@ class UserService {
     const users = await User.findAll({ where: { role } });
 
     // Si le rôle est 'Restaurant', ajouter les schedules réguliers et urgences
-    if (role === 'Restaurant') {
+    if (role === 'Restaurant' || role === 'Livreur') {
       for (const user of users) {
         const restaurantId = user.id;
 

@@ -1,5 +1,6 @@
 const orderService = require('../services/orderService');
 const { notifyClient, notifyRestaurant } = require('../../websocket');
+const { User } = require('../../models');
 
 class OrderController {
   async createOrder(req, res) {
@@ -33,19 +34,31 @@ class OrderController {
               }
           });
       });
-      orders.forEach(order => {
-        notifyClient('livreur', order.restaurant_id, {
-            type: 'NEW_ORDER',
-            order: {
-                id: order.id,
-                client_id: order.client_id,
-                items: order.lineOrders,
-                total: order.total,
-                status: order.status,
-                created_at: order.order_date,
+      const users = await User.findAll({ where: { role: 'Livreur' } });
+      
+      users.forEach(user => {
+        console.log(`Notifying livreur-${user.id} about new order.`);
+        orders.forEach(order => {
+            const success = notifyClient('delivery', user.id, {
+                type: 'NEW_ORDER',
+                order: {
+                    id: order.id,
+                    client_id: order.client_id,
+                    items: order.lineOrders,
+                    total: order.total,
+                    status: order.status,
+                    created_at: order.order_date,
+                }
+            });
+    
+            if (!success) {
+                console.log(`Failed to notify delivery-${user.id}`);
             }
         });
     });
+    
+    
+      
 
       res.status(201).json(orders);
   } catch (error) {
@@ -123,34 +136,55 @@ class OrderController {
     try {
       const { orderId } = req.params;
       const updatedOrder = await orderService.updateOrderStatusToReady(orderId);
-      
-      // Notify client that order is ready
+  
+      // Notifier le client que la commande est prête
       notifyClient('customer', updatedOrder.client_id, {
         type: 'ORDER_READY',
         order: {
           id: updatedOrder.id,
           status: updatedOrder.status,
-          ready_at: new Date()
-        }
+          ready_at: new Date(),
+        },
       });
-      // Also notify delivery person if assigned
+  
+      // Si un livreur est assigné, notifier ce livreur
       if (updatedOrder.delivery_person_id) {
         notifyClient('delivery', updatedOrder.delivery_person_id, {
           type: 'ORDER_READY_FOR_PICKUP',
           order: {
             id: updatedOrder.id,
             restaurant_id: updatedOrder.restaurant_id,
-            status: updatedOrder.status
-          }
+            status: updatedOrder.status,
+            ready_at: new Date(),
+          },
+        });
+      } else {
+        // Si aucun livreur n'est assigné, notifier tous les livreurs disponibles
+        const users = await User.findAll({ where: { role: 'Livreur' } });
+  
+        users.forEach(user => {
+          console.log(`Notifying livreur-${user.id} about order ready.`);
+          notifyClient('delivery', user.id, {
+            type: 'ORDER_READY',
+            order: {
+              id: updatedOrder.id,
+              client_id: updatedOrder.client_id,
+              restaurant_id: updatedOrder.restaurant_id,
+              total: updatedOrder.total,
+              status: updatedOrder.status,
+              ready_at: new Date(),
+            },
+          });
         });
       }
-
+  
       res.json(updatedOrder);
     } catch (err) {
       console.error("Error marking order as ready:", err);
       res.status(500).json({ error: err.message });
     }
   }
+  
   async getOrdersByDeliveryPerson(req, res) {
     try {
       const { deliveryPersonId } = req.params;

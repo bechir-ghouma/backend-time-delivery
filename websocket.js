@@ -35,28 +35,38 @@ wss.on('connection', (ws, req) => {
   // Handle incoming messages
   ws.on('message', (message) => {
     try {
-      const data = JSON.parse(message);
-      console.log('Received message from', connectionId, ':', data);
-      
-      // Handle different message types
-      switch (data.type) {
-        case 'ping':
-          sendToClient(ws, { type: 'pong', timestamp: Date.now() });
-          break;
-        case 'orderAcknowledged':
-          handleOrderAcknowledgment(data, ws);
-          break;
-        default:
-          console.log('Unhandled message type:', data.type);
-      }
+        const data = JSON.parse(message);
+        console.log('Received message from', ws.connectionId, ':', data);
+
+        // Handle different message types
+        switch (data.type) {
+            case 'CONNECT': // Handle CONNECT messages
+                if (!data.userId || !data.role) {
+                    console.warn('CONNECT message missing userId or role:', data);
+                    sendToClient(ws, { type: 'error', message: 'Invalid CONNECT message' });
+                } else {
+                    console.log(`User ${data.userId} with role ${data.role} connected.`);
+                    sendToClient(ws, { type: 'CONNECTED', status: 'ok', userId: data.userId, role: data.role });
+                }
+                break;
+
+            case 'PING': // Handle PING messages
+                console.log(`Received PING from ${ws.connectionId}`);
+                sendToClient(ws, { type: 'PONG', timestamp: Date.now() });
+                break;
+
+            case 'orderAcknowledged': // Example of another message type
+                handleOrderAcknowledgment(data, ws);
+                break;
+
+            default:
+                console.log('Unhandled message type:', data.type);
+        }
     } catch (error) {
-      console.error('Error processing message:', error);
-      sendToClient(ws, {
-        type: 'error',
-        message: 'Invalid message format'
-      });
+        console.error('Error processing message:', error);
+        sendToClient(ws, { type: 'error', message: 'Invalid message format' });
     }
-  });
+});
 
   // Handle disconnection
   ws.on('close', () => {
@@ -88,7 +98,11 @@ const sendToClient = (ws, data) => {
 const notifyClient = (role, userId, data) => {
   const connectionId = `${role}-${userId}`;
   const client = connections.get(connectionId);
-  
+  if (!connections.has(connectionId)) {
+    console.log(`No active connection for ${connectionId}`);
+} else {
+    console.log(`Found active connection for ${connectionId}`);
+}
   if (client) {
     console.log(`Sending message to ${role} ${userId}:`, data);
     return sendToClient(client, data);

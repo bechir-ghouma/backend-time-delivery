@@ -187,7 +187,7 @@ class OrderService {
           {
             model: User, // Include restaurant information
             as: 'restaurant',
-            attributes: ['id', 'first_name', 'last_name', 'email','latitude','longitude'],
+            attributes: ['id', 'first_name', 'last_name', 'email','latitude','longitude','name_restaurant','phone_number'],
           },
         ],
       });
