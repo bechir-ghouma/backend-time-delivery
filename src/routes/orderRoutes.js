@@ -17,6 +17,7 @@ router.put('/:orderId/ready', orderController.markOrderAsReady);
 router.get('/delivery-person/:deliveryPersonId', orderController.getOrdersByDeliveryPerson);
 router.get('/client/:client_id', orderController.getOrdersByClientId);
 router.post('/restaurant/:id_restaurant/orders-by-date', orderController.getOrdersByRestaurantAndDate);
+router.post('/livreur/:id_livreur/orders-by-date', orderController.getOrdersByLivreurAndDate);
 // New route for updating order status
 router.patch('/:orderId/status', orderController.updateOrderStatus);
 

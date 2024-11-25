@@ -223,6 +223,22 @@ class OrderController {
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
   }
+
+
+  async getOrdersByLivreurAndDate(req, res) {
+    const { id_livreur } = req.params;
+    const { date } = req.body;
+
+    try {
+      const orders = await orderService.getOrdersByLivreurAndDate(id_livreur, date);
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching orders by restaurant and date:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  }  
+
+
   // Add method to update order status with notifications
   async updateOrderStatus(req, res) {
     try {
