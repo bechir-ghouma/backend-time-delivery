@@ -75,12 +75,12 @@ class UserService {
     const users = await User.findAll({ where: { role } });
 
     // Si le rôle est 'Restaurant', ajouter les schedules réguliers et urgences
-    if (role === 'Restaurant' || role === 'Livreur') {
+    if (role === 'Restaurant' ) {
       for (const user of users) {
         const restaurantId = user.id;
 
         // Récupérer le schedule régulier
-        const regularSchedule = await RegularScheduleService.getSchedule(restaurantId);
+        const regularSchedule = await RegularScheduleService.getScheduleRestaurant(restaurantId);
 
         // Récupérer le schedule d'urgence
         const emergencyClosure = await EmergencyClosureService.getEmergencyClosure(restaurantId);
@@ -89,6 +89,19 @@ class UserService {
         user.dataValues.regularSchedule = regularSchedule;
         user.dataValues.emergencyClosure = emergencyClosure;
       }
+    }
+    else if(role === 'Livreur'){
+      for (const user of users) {
+        const restaurantId = user.id;
+
+        // Récupérer le schedule régulier
+        const regularSchedule = await RegularScheduleService.getSchedule(restaurantId);
+
+
+        // Ajouter les schedules aux données utilisateur
+        user.dataValues.regularSchedule = regularSchedule;
+    }
+
     }
 
     return users;

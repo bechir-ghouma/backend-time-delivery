@@ -14,29 +14,32 @@ cloudinary.config({
 class UserController {
   async createUser(req, res) {
     try {
-      // Log to check if the file is processed
       console.log('File received:', req.file);
+
       if (req.file) {
-        // Check the file path
-        console.log('File stored at:', req.file.path);
-        req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
-        const path = `C:/Users/Dell/OneDrive/Bureau/eat11.16/frontend/EatTime/assets/images/${req.file.filename}`;
-        const results = await cloudinary.uploader.upload(path, {
-          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
-        });
-        const url = cloudinary.url(results.public_id,{
-          transformation: [
+        // Upload file directly to Cloudinary from buffer
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
             {
-              quality: 'auto',
-              fetch_format: 'auto'
+              resource_type: 'image', // Specify resource type
+              folder: 'EatTime/images', // Optional: specify folder in Cloudinary
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
             }
-          ]
+          ).end(req.file.buffer); // Pass the file buffer to Cloudinary
         });
-        req.body.image = url;
+
+        console.log('Cloudinary upload result:', result);
+        req.body.image = result.secure_url; // Store the Cloudinary URL in the body
       } else {
         console.log('No file received');
       }
 
+      console.log('req.body:', req.body);
+
+      // Pass the data to the service layer
       const user = await userService.createUser(req.body);
       res.status(201).json(user);
     } catch (err) {

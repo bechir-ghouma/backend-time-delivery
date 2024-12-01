@@ -12,31 +12,33 @@ cloudinary.config({
 class MenuController {
   async createMenu(req, res) {
     try {
-        console.log('File received:', req.file);
+      console.log('File received:', req.file);
 
       if (req.file) {
-        // Check the file path
-        console.log('File stored at:', req.file.path);
-        req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
-        const path = `C:/Users/Dell/OneDrive/Bureau/eat11.16/frontend/EatTime/assets/images/${req.file.filename}`;
-        const results = await cloudinary.uploader.upload(path, {
-          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
-        });
-        const url = cloudinary.url(results.public_id,{
-          transformation: [
+        // Upload file directly to Cloudinary from buffer
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
             {
-              quality: 'auto',
-              fetch_format: 'auto'
+              resource_type: 'image',
+              folder: 'EatTime/menus', // Optional: Specify a Cloudinary folder
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
             }
-          ]
+          ).end(req.file.buffer); // Pass file buffer to Cloudinary
         });
-        req.body.image = url;
+
+        console.log('Cloudinary upload result:', result);
+        req.body.image = result.secure_url; // Store Cloudinary URL in the body
       } else {
         console.log('No file received');
       }
+
       const menu = await MenuService.createMenu(req.body);
       res.status(201).json(menu);
     } catch (error) {
+      console.error('Error creating menu:', error);
       res.status(500).json({ message: error.message });
     }
   }
@@ -76,28 +78,30 @@ class MenuController {
       console.log('File received:', req.file);
 
       if (req.file) {
-        // Check the file path
-        console.log('File stored at:', req.file.path);
-        req.body.image = req.file.filename; // Store the image filename in the body for saving in the database
-        const path = `C:/Users/Dell/OneDrive/Bureau/eat11.16/frontend/EatTime/assets/images/${req.file.filename}`;
-        const results = await cloudinary.uploader.upload(path, {
-          timestamp: Math.floor(Date.now() / 1000),  // Generate current timestamp in seconds
-        });
-        const url = cloudinary.url(results.public_id,{
-          transformation: [
+        // Upload file directly to Cloudinary from buffer
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
             {
-              quality: 'auto',
-              fetch_format: 'auto'
+              resource_type: 'image',
+              folder: 'EatTime/menus', // Optional: Specify a Cloudinary folder
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
             }
-          ]
+          ).end(req.file.buffer); // Pass file buffer to Cloudinary
         });
-        req.body.image = url;
+
+        console.log('Cloudinary upload result:', result);
+        req.body.image = result.secure_url; // Store Cloudinary URL in the body
       } else {
         console.log('No file received');
       }
+
       const menu = await MenuService.updateMenu(req.params.id, req.body);
       res.status(200).json(menu);
     } catch (error) {
+      console.error('Error updating menu:', error);
       res.status(500).json({ message: error.message });
     }
   }

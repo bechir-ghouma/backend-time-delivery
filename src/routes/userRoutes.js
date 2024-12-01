@@ -8,9 +8,9 @@ const path = require('path');
 const router = express.Router();
 
 // double check the destination
-const storage = multer.diskStorage({
+/*const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const destPath = path.join('C:', 'Users', 'Dell','OneDrive','Bureau', 'eat11.16', 'frontend', 'EatTime', 'assets', 'images');
+        const destPath = path.join('C:', 'salemketata', 'Freelance','DelevryFoodApp','frontend', 'EatTime', 'assets', 'images');
         console.log('Destination Path:', destPath); // Log to verify
         cb(null, destPath);
 
@@ -28,7 +28,18 @@ const upload = multer({
 }).single('image');
 
 
+router.post('/', upload, userValidationRules(), validate, userController.createUser);*/
+// Use multer's memory storage
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+}).single('image');
+
+// Define the route and connect it to the controller method
 router.post('/', upload, userValidationRules(), validate, userController.createUser);
+//router.post('/', userValidationRules(), validate, userController.createUser);
 
 
 // Get all users
@@ -43,6 +54,7 @@ router.get('/role/:role', userController.getUsersByRole);
 // Update a user
 // router.put('/:id', userValidationRules(), validate, userController.updateUser);
 router.put('/:id',upload, userController.updateUser);
+//router.put('/:id',userController.updateUser);
 router.put('/update-tarif-restaurant/:userId', userController.updateRestaurantTarif);
 
 // Delete a user

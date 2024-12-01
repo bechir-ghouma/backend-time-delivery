@@ -4,29 +4,15 @@ const multer = require('multer');
 const path = require('path');
 const router = express.Router();
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const destPath = path.join('C:', 'Users', 'Dell','OneDrive','Bureau', 'eat11.16', 'frontend', 'EatTime', 'assets', 'images');
-        console.log('Destination Path:', destPath); // Log to verify
-        cb(null, destPath);
-
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname).toLowerCase(); // Ensure correct file extension
-        cb(null, uniqueSuffix + ext);
-    }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
 }).single('image');
 
-
-// Route pour créer une catégorie
-router.post('/',upload,CategoryController.createCategory);
-
+// Route for creating a category
+router.post('/', upload, CategoryController.createCategory);
 // Route pour récupérer toutes les catégories
 router.get('/', CategoryController.getAllCategories);
 
