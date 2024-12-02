@@ -6,21 +6,23 @@ function getDatesOfCurrentWeek() {
     const currentDay = today.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
     const dates = [];
 
-    // Calculer le début de la semaine (lundi)
+    // Calculer le début de la semaine (lundi local)
     const startOfWeek = new Date(today);
-    const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Si dimanche, remonter de 6 jours, sinon depuis lundi
+    const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Si dimanche (0), remonter de 6 jours
     startOfWeek.setDate(today.getDate() - daysSinceMonday);
-    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setHours(0, 0, 0, 0); // Réinitialiser les heures
 
-    // Générer les dates de lundi à dimanche
-    for (let i = 0; i < 8; i++) {
+    // Générer les dates de lundi à dimanche (7 jours)
+    for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek);
         date.setDate(startOfWeek.getDate() + i); // Ajoute i jours
-        dates.push(date.toISOString().split('T')[0]); // Formate en YYYY-MM-DD
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000); // Ajuste pour fuseau horaire local
+        dates.push(localDate.toISOString().split('T')[0]); // Formate en YYYY-MM-DD
     }
 
     return dates;
 }
+
 
 
 function getDatesOfNextWeek() {
@@ -45,48 +47,51 @@ function getDatesOfNextWeek() {
 
 
 class RegularScheduleService {
-  async updateSchedule(scheduleData, restaurantId) {
-    const results = [];
-    const datesOfWeek = getDatesOfCurrentWeek(); // Obtenir les dates de la semaine actuelle
-    const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-    for (let i = 0; i < daysOfWeek.length; i++) {
-        const day = daysOfWeek[i];
-        const date = datesOfWeek[i];
-
-        // Vérifier si une entrée existe pour ce jour et cette date
-        const existingDaySchedule = await RegularSchedule.findOne({
-            where: {
-                day,
-                restaurant_id: restaurantId,
-                date: { [Op.eq]: date },
-            },
-        });
-
-        if (existingDaySchedule) {
-            // Mettre à jour si le jour existe déjà
-            const updated = await existingDaySchedule.update({
-                enabled: scheduleData[day]?.enabled || false,
-                openTime: scheduleData[day]?.openTime || null,
-                closeTime: scheduleData[day]?.closeTime || null,
+    async updateSchedule(scheduleData, restaurantId) {
+        const results = [];
+        const datesOfWeek = getDatesOfCurrentWeek(); // Retrieve the dates of the current week
+        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+        for (let i = 0; i < daysOfWeek.length; i++) {
+            const day = daysOfWeek[i];
+            const date = datesOfWeek[i];
+    
+            // Find the corresponding schedule data for the current day
+            const daySchedule = scheduleData.find((entry) => entry.day.toLowerCase() === day);
+    
+            const existingDaySchedule = await RegularSchedule.findOne({
+                where: {
+                    day,
+                    restaurant_id: restaurantId,
+                    date: { [Op.eq]: date },
+                },
             });
-            results.push(updated);
-        } else {
-            // Créer une nouvelle entrée pour le jour manquant
-            const created = await RegularSchedule.create({
-                day,
-                enabled: scheduleData[day]?.enabled || false,
-                openTime: scheduleData[day]?.openTime || null,
-                closeTime: scheduleData[day]?.closeTime || null,
-                restaurant_id: restaurantId,
-                date: date, // Date système pour le jour
-            });
-            results.push(created);
+    
+            if (existingDaySchedule) {
+                // Update if the day already exists
+                const updated = await existingDaySchedule.update({
+                    enabled: daySchedule?.enabled || false,
+                    openTime: daySchedule?.openTime || null,
+                    closeTime: daySchedule?.closeTime || null,
+                });
+                results.push(updated);
+            } else {
+                // Create a new entry for the missing day
+                const created = await RegularSchedule.create({
+                    day,
+                    enabled: daySchedule?.enabled || false,
+                    openTime: daySchedule?.openTime || null,
+                    closeTime: daySchedule?.closeTime || null,
+                    restaurant_id: restaurantId,
+                    date: date, // System date for the day
+                });
+                results.push(created);
+            }
         }
+    
+        return results;
     }
-
-    return results;
-}
+    
 
 async  updateScheduleForNextWeekLivreur(scheduleData, restaurantId) {
     const results = [];
