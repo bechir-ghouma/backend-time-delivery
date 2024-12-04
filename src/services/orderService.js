@@ -345,6 +345,25 @@ class OrderService {
       throw error;
     }
   }
+
+  async updateOrderStatus(orderId, newStatus) {
+    try {
+      const order = await Order.findByPk(orderId);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+  
+      // Mettre à jour le statut
+      order.status = newStatus;
+      await order.save();
+  
+      return order;
+    } catch (error) {
+      console.error("Error updating order status in service:", error);
+      throw error;
+    }
+  }
+  
   
 }
 

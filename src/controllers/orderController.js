@@ -240,7 +240,7 @@ class OrderController {
 
 
   // Add method to update order status with notifications
-  async updateOrderStatus(req, res) {
+  /*async updateOrderStatus(req, res) {
     try {
       const { orderId } = req.params;
       const { status } = req.body;
@@ -312,7 +312,24 @@ class OrderController {
       console.error("Error updating order status:", error);
       res.status(500).json({ error: 'Failed to update order status' });
     }
-  }
+  }*/
+
+    async updateOrderStatus(req, res) {
+      try {
+        const { orderId } = req.params; // Récupérer l'ID de la commande depuis les paramètres
+        const { status } = req.body;   // Récupérer le nouveau statut depuis le corps de la requête
+    
+        // Appeler la méthode de service pour mettre à jour le statut
+        const updatedOrder = await orderService.updateOrderStatus(orderId, status);
+    
+        // Réponse HTTP avec la commande mise à jour
+        res.status(200).json(updatedOrder);
+      } catch (error) {
+        console.error("Error updating order status:", error);
+        res.status(500).json({ error: 'Failed to update order status' });
+      }
+    }
+    
   
   async getPendingOrders(req, res) {
     try {
