@@ -71,13 +71,35 @@ class UserController {
   }
  
   async updateUser(req, res) {
+   
     try {
       console.log('Request body:', req.body);
       console.log('File received:', req.file);
       console.log("id User:",req.params.id);
       console.log('Local time:', Date.now());
       console.log('UTC time (seconds):', Math.floor(Date.now() / 1000));
-    
+      if (req.file) {
+        // Upload file directly to Cloudinary from buffer
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            {
+              resource_type: 'image', // Specify resource type
+              folder: 'EatTime/images', // Optional: specify folder in Cloudinary
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(req.file.buffer); // Pass the file buffer to Cloudinary
+        });
+
+        console.log('Cloudinary upload result:', result);
+        req.body.image = result.secure_url; // Store the Cloudinary URL in the body
+      } else {
+        console.log('No file received');
+      }
+
+      console.log('req.body:', req.body);
       
       const updatedUser = await userService.updateUser(req.params.id, {
         ...req.body,
