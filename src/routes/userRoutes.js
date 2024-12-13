@@ -74,4 +74,7 @@ router.post('/request-password-reset', userController.sendMailResetPassword);
 router.post('/verify-token', userController.verifyToken);
 
 router.post('/change-password', userController.changePassword);
+
+router.get('/restaurants/with-promotions', userController.getRestaurantsWithPromotions);
+
 module.exports = router;

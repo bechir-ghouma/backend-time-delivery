@@ -352,6 +352,18 @@ class OrderController {
       res.status(500).json({ message: error.message });
     }
   }
+
+  async getOrdersByStatus(req, res) {
+    try {
+      const { status } = req.params; // Récupérer le statut depuis les paramètres de la requête
+      const orders = await orderService.getOrdersByStatus(status);
+      res.status(200).json(orders);
+    } catch (error) {
+      console.error('Error fetching orders by status:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
 }
 
 module.exports = new OrderController();

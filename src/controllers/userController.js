@@ -219,6 +219,16 @@ class UserController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async getRestaurantsWithPromotions(req, res) {
+    try {
+      const restaurants = await userService.getRestaurantsWithPromotions();
+      res.status(200).json(restaurants);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
 }
 
 module.exports = new UserController();

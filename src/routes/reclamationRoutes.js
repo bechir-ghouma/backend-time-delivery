@@ -7,6 +7,8 @@ const ReclamationController = require('../controllers/reclamationController');
 // Créer une nouvelle réclamation
 router.post('/',  ReclamationController.createReclamation);
 
+router.get('/', ReclamationController.getAllReclamations);
+
 // Obtenir toutes les réclamations pour un client
 router.get('/:id', ReclamationController.getReclamationsByClientId);
 

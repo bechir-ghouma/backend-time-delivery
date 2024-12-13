@@ -22,4 +22,7 @@ router.post('/livreur/:id_livreur/orders-by-date', orderController.getOrdersByLi
 //router.patch('/:orderId/status', orderController.updateOrderStatus);
 router.put('/:orderId/status', orderController.updateOrderStatus);
 
+router.get('/status/:status', orderController.getOrdersByStatus);
+
+
 module.exports = router;

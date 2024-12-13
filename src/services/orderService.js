@@ -364,6 +364,44 @@ class OrderService {
     }
   }
   
+  async getOrdersByStatus(status) {
+    try {
+      const orders = await Order.findAll({
+        where: {
+          status, // Filtrer par statut
+        },
+        include: [
+          {
+            model: User,
+            as: 'client',
+            attributes: ['id', 'first_name', 'last_name', 'email'], // Inclure les informations du client
+          },
+          {
+            model: User,
+            as: 'restaurant',
+            attributes: ['id', 'name_restaurant', 'email'], // Inclure les informations du restaurant
+          },
+          {
+            model: LineOrder,
+            as: 'lines_order', // Inclure les lignes de commande
+            include: [
+              {
+                model: Menu,
+                as: 'menu',
+                attributes: ['id', 'name', 'price'], // Inclure les informations du menu
+              },
+            ],
+          },
+        ],
+      });
+  
+      return orders;
+    } catch (error) {
+      console.error('Error fetching orders by status:', error);
+      throw error;
+    }
+  }
+  
   
 }
 

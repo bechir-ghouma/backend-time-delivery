@@ -1,4 +1,4 @@
-const { User } = require('../../models');
+const { User,Category,Menu } = require('../../models');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
 const nodemailer = require('nodemailer');
@@ -235,6 +235,35 @@ class UserService {
 
     return user; // retourne l'utilisateur mis à jour
   }
+
+  async getRestaurantsWithPromotions() {
+    const usersWithPromotions = await User.findAll({
+      where: {
+        role: 'Restaurant',
+        deleted: false, // Exclure les restaurants supprimés
+      },
+      include: [
+        {
+          model: Category,
+          as: 'categories',
+          required: true,
+          include: [
+            {
+              model: Menu,
+              as: 'menus',
+              required: true,
+              where: {
+                promotion: { [Op.gt]: 0 }, // Vérifie que la promotion est supérieure à 0
+              },
+            },
+          ],
+        },
+      ],
+    });
+  
+    return usersWithPromotions;
+  }
+  
 }
 
 module.exports = new UserService();

@@ -34,6 +34,26 @@ class RatingController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async getRestaurantsSortedByRating(req, res) {
+    try {
+      const restaurants = await ratingService.getRestaurantsSortedByRating();
+      res.status(200).json(restaurants);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  async getTop3RatedRestaurants(req, res) {
+    try {
+      const topRestaurants = await ratingService.getTop3RatedRestaurants();
+      res.status(200).json(topRestaurants);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  
 }
 
 module.exports = new RatingController();

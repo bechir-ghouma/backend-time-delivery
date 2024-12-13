@@ -1,8 +1,21 @@
 // services/reclamationService.js
 
 const { Reclamation, User } = require('../../models');
+const { Op } = require('sequelize');
 
 const ReclamationService = {
+
+  async getAllReclamations() {
+    return await Reclamation.findAll({
+        where: {
+            status: {
+                [Op.ne]: 'Supprimé', // Opérateur "not equal" de Sequelize
+            },
+        },
+    });
+},
+
+
   // Créer une nouvelle réclamation
   async createReclamation(clientId, subject, description,order_id,phone_number,name_restaurant) {
     return await Reclamation.create({ client_id: clientId, subject, description,order_id,phone_number,name_restaurant });
@@ -28,9 +41,11 @@ const ReclamationService = {
   async deleteReclamation(id) {
     const reclamation = await Reclamation.findByPk(id);
     if (!reclamation) throw new Error('Réclamation non trouvée');
-    await reclamation.destroy();
+    reclamation.status = 'Supprimé';
+    await reclamation.save();
     return reclamation;
-  },
+},
+
 };
 
 module.exports = ReclamationService;

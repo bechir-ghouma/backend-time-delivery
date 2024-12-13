@@ -1,4 +1,4 @@
-const { Rating,sequelize  } = require('../../models');
+const { Rating,sequelize,User  } = require('../../models');
 
 class RatingService {
   // Add or update a rating for a restaurant
@@ -51,6 +51,53 @@ class RatingService {
       userRating: userSpecificRating 
     };
   }
+
+  async getRestaurantsSortedByRating() {
+    const ratings = await Rating.findAll({
+      attributes: [
+        'restaurantId',
+        [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating'], // Calcul de la moyenne des notes
+      ],
+      include: [
+        {
+          model: User,
+          as: 'restaurantDetails',
+          attributes: ['id', 'name_restaurant', 'address', 'image', 'tarif_restaurant'],
+        },
+      ],
+      group: ['restaurantId', 'restaurantDetails.id'], // Groupement par restaurant
+      order: [[sequelize.fn('AVG', sequelize.col('rating')), 'DESC']], // Tri décroissant
+    });
+  
+    // Retourner uniquement les détails des restaurants
+    return ratings.map((rating) => rating.get('restaurantDetails'));
+  }
+  
+
+  async getTop3RatedRestaurants() {
+    const ratings = await Rating.findAll({
+      attributes: [
+        'restaurantId',
+        [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating'], // Calcul de la moyenne des ratings
+      ],
+      include: [
+        {
+          model: User,
+          as: 'restaurantDetails',
+          attributes: ['id', 'name_restaurant', 'address', 'image', 'tarif_restaurant'], // Attributs du restaurant
+        },
+      ],
+      group: ['restaurantId', 'restaurantDetails.id'], // Groupement par restaurant
+      order: [[sequelize.fn('AVG', sequelize.col('rating')), 'DESC']], // Tri décroissant
+      limit: 3, // Limiter à 3 résultats
+    });
+  
+    // Retourner uniquement les informations des restaurants
+    return ratings.map((rating) => rating.get('restaurantDetails'));
+  }
+  
+  
+  
 }
 
 module.exports = new RatingService();

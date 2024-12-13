@@ -25,7 +25,13 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: false,  // Enables `createdAt` and `updatedAt` fields
   });
-
+  Rating.associate = function (models) {
+    Rating.belongsTo(models.User, {
+      foreignKey: 'restaurantId',
+      as: 'restaurantDetails', // Alias utilisé dans la requête
+    });
+  };
+  
 
   return Rating;
 };

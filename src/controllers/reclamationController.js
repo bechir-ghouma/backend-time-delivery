@@ -3,6 +3,16 @@
 const ReclamationService = require('../services/reclamationService');
 
 const ReclamationController = {
+
+  async getAllReclamations(req, res) {
+    try {
+      const reclamations = await ReclamationService.getAllReclamations();
+      res.status(200).json(reclamations);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // Créer une nouvelle réclamation
   async createReclamation(req, res) {
     try {

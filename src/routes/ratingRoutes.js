@@ -10,4 +10,10 @@ router.get('/restaurants/:restaurantId/average-rating', ratingController.getAver
 
 router.post('/getRestaurantRatingWithUserRating', ratingController.getRestaurantRatingWithUserRating);
 
+router.get('/restaurants/sorted-by-rating', ratingController.getRestaurantsSortedByRating);
+
+router.get('/restaurants/top-rated', ratingController.getTop3RatedRestaurants);
+
+
+
 module.exports = router;
