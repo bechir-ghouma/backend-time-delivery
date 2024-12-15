@@ -178,6 +178,7 @@ class OrderService {
   
       const orders = await Order.findAll({
         where: whereCondition,
+        order: [['id', 'DESC']],
         include: [
           {
             model: User, // Include client information
@@ -283,7 +284,9 @@ class OrderService {
     try {
       const pendingOrders = await Order.findAll({
         where: {
-          status: 'En Attente', // Filtrer les commandes avec statut "En Attente"
+          status: {
+            [Op.in]: ['En Attente', 'Prête'] // Use Op.in to select multiple statuses
+          }
         },
         include: [
           {
