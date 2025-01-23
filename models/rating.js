@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     timestamps: false,  // Enables `createdAt` and `updatedAt` fields
+    tableName: 'ratings'
   });
   Rating.associate = function (models) {
     Rating.belongsTo(models.User, {

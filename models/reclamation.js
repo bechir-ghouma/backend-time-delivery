@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     }, {
       timestamps: false,  // Enables `createdAt` and `updatedAt` fields
+      tableName: 'reclamations',
     });
   
     Reclamation.associate = (models) => {

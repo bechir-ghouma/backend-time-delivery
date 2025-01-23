@@ -75,7 +75,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true, // Optionnel, selon vos besoins
     },
   }, {
-    timestamps: false  // Disable automatic timestamps
+    timestamps: false,  // Disable automatic timestamps
+    tableName: 'orders'
   });
 
   Order.associate = function(models) {
