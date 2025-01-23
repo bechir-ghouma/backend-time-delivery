@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
-    verificationCode : {
+    verificationCode: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -87,7 +87,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
   }, {
-    timestamps: false  // Disable automatic timestamps
+    timestamps: false,  // Disable automatic timestamps
+    tableName: 'users'
   });
 
   User.associate = function(models) {
