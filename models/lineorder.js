@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    timestamps: false  // Disable automatic timestamps
+    timestamps: false,  // Disable automatic timestamps
+    tableName: 'lineorders'
   });
 
   LineOrder.associate = function(models) {
