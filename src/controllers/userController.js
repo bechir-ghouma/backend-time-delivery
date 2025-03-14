@@ -12,6 +12,28 @@ cloudinary.config({
 
 
 class UserController {
+  async savePushToken(req, res) {
+    try {
+      const { userId, pushToken } = req.body;
+
+      if (!userId || !pushToken) {
+        return res.status(400).json({ error: 'User ID and push token are required' });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      user.pushToken = pushToken;
+      await user.save();
+
+      res.status(200).json({ message: 'Push token saved successfully' });
+    } catch (error) {
+      console.error('Error saving push token:', error);
+      res.status(500).json({ error: 'Failed to save push token' });
+    }
+  }
   async createUser(req, res) {
     try {
       console.log('File received:', req.file);

@@ -1,12 +1,20 @@
-# fly.toml app configuration file generated for time-delivery-server on 2025-01-21T02:23:59+01:00
+# fly.toml app configuration file generated for time-delivery-server-delicate-pond-4648 on 2025-03-14T09:54:14+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'time-delivery-server'
+app = 'time-delivery-server-delicate-pond-4648'
 primary_region = 'mad'
 
 [build]
+
+[env]
+  CLOUDINARY_CLOUD_NAME = 'delivery'
+  DB_HOST = 'timedelivery-db.internal'
+  DB_NAME = 'delevry_food'
+  NODE_ENV = 'production'
+  PORT = '3000'
+  TZ = 'Europe/Madrid'
 
 [http_service]
   internal_port = 3000
@@ -20,12 +28,3 @@ primary_region = 'mad'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
-
-[env]
-  PORT = "3000"
-  NODE_ENV = "production"
-  TZ = "Europe/Madrid"
-  DB_HOST = "time-delivery-db.internal"
-  DB_NAME = "time_delivery"
-  CLOUDINARY_CLOUD_NAME = "delivery"
-

@@ -2,69 +2,159 @@ const orderService = require('../services/orderService');
 const { notifyClient, notifyRestaurant } = require('../../websocket');
 const { User } = require('../../models');
 
+
 class OrderController {
+  // async createOrder(req, res) {
+  //   try {
+  //     const orders = await orderService.createOrder(req.body, req.body.lineOrders);
+
+  //     // Notifier le client une seule fois
+  //     if (orders.length > 0) {
+  //         notifyClient('customer', orders[0].client_id, {
+  //             type: 'NEW_ORDER',
+  //             orders: orders.map(order => ({
+  //                 id: order.id,
+  //                 status: order.status,
+  //                 total: order.total,
+  //                 created_at: order.created_at,
+  //             }))
+  //         });
+  //     }
+
+  //     // Notifier chaque restaurant pour chaque ordre créé
+  //     orders.forEach(order => {
+  //         notifyClient('restaurant', order.restaurant_id, {
+  //             type: 'NEW_ORDER',
+  //             order: {
+  //                 id: order.id,
+  //                 client_id: order.client_id,
+  //                 items: order.lineOrders,
+  //                 total: order.total,
+  //                 status: order.status,
+  //                 created_at: order.created_at,
+  //             }
+  //         });
+  //     });
+  //     const users = await User.findAll({ where: { role: 'Livreur' } });
+      
+  //     users.forEach(user => {
+  //       console.log(`Notifying livreur-${user.id} about new order.`);
+  //       orders.forEach(order => {
+  //           const success = notifyClient('delivery', user.id, {
+  //               type: 'NEW_ORDER',
+  //               order: {
+  //                   id: order.id,
+  //                   client_id: order.client_id,
+  //                   items: order.lineOrders,
+  //                   total: order.total,
+  //                   status: order.status,
+  //                   created_at: order.order_date,
+  //               }
+  //           });
+    
+  //           if (!success) {
+  //               console.log(`Failed to notify delivery-${user.id}`);
+  //           }
+  //       });
+  //   });
+    
+    
+      
+
+  //     res.status(201).json(orders);
+  // } catch (error) {
+  //     console.error("Error creating grouped orders:", error);
+  //     res.status(400).json({ error: 'Error creating grouped orders' });
+  // }
+  // }
   async createOrder(req, res) {
     try {
       const orders = await orderService.createOrder(req.body, req.body.lineOrders);
 
-      // Notifier le client une seule fois
-      if (orders.length > 0) {
-          notifyClient('customer', orders[0].client_id, {
-              type: 'NEW_ORDER',
-              orders: orders.map(order => ({
-                  id: order.id,
-                  status: order.status,
-                  total: order.total,
-                  created_at: order.created_at,
-              }))
-          });
+      if (orders.length === 0) {
+        return res.status(400).json({ error: 'No orders created' });
       }
 
-      // Notifier chaque restaurant pour chaque ordre créé
-      orders.forEach(order => {
-          notifyClient('restaurant', order.restaurant_id, {
-              type: 'NEW_ORDER',
-              order: {
-                  id: order.id,
-                  client_id: order.client_id,
-                  items: order.lineOrders,
-                  total: order.total,
-                  status: order.status,
-                  created_at: order.created_at,
-              }
-          });
+      // ✅ **Step 1: Notify the Customer via WebSocket**
+      notifyClient('customer', orders[0].client_id, {
+        type: 'NEW_ORDER',
+        orders: orders.map(order => ({
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          created_at: order.created_at,
+        })),
       });
-      const users = await User.findAll({ where: { role: 'Livreur' } });
-      
-      users.forEach(user => {
+
+      // ✅ **Step 2: Notify the Restaurant via WebSocket**
+      orders.forEach(order => {
+        notifyClient('restaurant', order.restaurant_id, {
+          type: 'NEW_ORDER',
+          order: {
+            id: order.id,
+            client_id: order.client_id,
+            items: order.lineOrders,
+            total: order.total,
+            status: order.status,
+            created_at: order.created_at,
+          },
+        });
+      });
+
+      // ✅ **Step 3: Fetch the Restaurant’s Push Token from the Database**
+      const restaurant = await User.findOne({
+        where: { id: orders[0].restaurant_id },
+      });
+
+      if (restaurant && restaurant.pushToken && Expo.isExpoPushToken(restaurant.pushToken)) {
+        // ✅ **Step 4: Send Push Notification to Restaurant**
+        const message = {
+          to: restaurant.pushToken,
+          sound: 'default',
+          title: 'Nouvelle Commande!',
+          body: `Une nouvelle commande a été placée - Total: ${orders[0].total.toFixed(2)} TND`,
+          data: { orderId: orders[0].id },
+        };
+
+        try {
+          await expo.sendPushNotificationsAsync([message]);
+          console.log('Push notification sent to restaurant');
+        } catch (error) {
+          console.error('Error sending push notification:', error);
+        }
+      } else {
+        console.warn('Restaurant does not have a valid push token');
+      }
+
+      // ✅ **Step 5: Notify Delivery Persons via WebSocket**
+      const deliveryUsers = await User.findAll({ where: { role: 'Livreur' } });
+
+      deliveryUsers.forEach(user => {
         console.log(`Notifying livreur-${user.id} about new order.`);
         orders.forEach(order => {
-            const success = notifyClient('delivery', user.id, {
-                type: 'NEW_ORDER',
-                order: {
-                    id: order.id,
-                    client_id: order.client_id,
-                    items: order.lineOrders,
-                    total: order.total,
-                    status: order.status,
-                    created_at: order.order_date,
-                }
-            });
-    
-            if (!success) {
-                console.log(`Failed to notify delivery-${user.id}`);
-            }
+          const success = notifyClient('delivery', user.id, {
+            type: 'NEW_ORDER',
+            order: {
+              id: order.id,
+              client_id: order.client_id,
+              items: order.lineOrders,
+              total: order.total,
+              status: order.status,
+              created_at: order.order_date,
+            },
+          });
+
+          if (!success) {
+            console.log(`Failed to notify delivery-${user.id}`);
+          }
         });
-    });
-    
-    
-      
+      });
 
       res.status(201).json(orders);
-  } catch (error) {
-      console.error("Error creating grouped orders:", error);
-      res.status(400).json({ error: 'Error creating grouped orders' });
-  }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      res.status(500).json({ error: 'Error creating order' });
+    }
   }
 
   async getAllOrders(req, res) {
@@ -238,81 +328,6 @@ class OrderController {
     }
   }  
 
-
-  // Add method to update order status with notifications
-  /*async updateOrderStatus(req, res) {
-    try {
-      const { orderId } = req.params;
-      const { status } = req.body;
-      
-      const updatedOrder = await orderService.updateOrderStatus(orderId, status);
-      
-      // Notify all relevant parties about status change
-      const notifications = {
-        'PREPARING': {
-          client: 'ORDER_PREPARING',
-          restaurant: 'ORDER_IN_PREPARATION'
-        },
-        'READY': {
-          client: 'ORDER_READY',
-          delivery: 'ORDER_READY_FOR_PICKUP'
-        },
-        'DELIVERED': {
-          client: 'ORDER_DELIVERED',
-          restaurant: 'ORDER_COMPLETED'
-        }
-      };
-
-      if (notifications[status]) {
-        // Notify client
-        notifyClient('customer', updatedOrder.client_id, {
-          type: notifications[status].client,
-          order: {
-            id: updatedOrder.id,
-            status: status,
-            updated_at: new Date()
-          }
-        });
-
-        // Notify restaurant
-        notifyClient('restaurant', updatedOrder.restaurant_id, {
-          type: notifications[status].restaurant,
-          order: {
-            id: updatedOrder.id,
-            status: status,
-            updated_at: new Date()
-          }
-        });
-
-        // Notify el livreur ki yji order
-        notifyClient('livreur', updatedOrder.delivery_person_id, {
-          type: notifications[status].delivery,
-          order: {
-            id: updatedOrder.id,
-            status: status,
-            updated_at: new Date()
-          }
-        });        
-
-        // Notify delivery person if assigned
-        if (updatedOrder.delivery_person_id && notifications[status].delivery) {
-          notifyClient('delivery', updatedOrder.delivery_person_id, {
-            type: notifications[status].delivery_person,
-            order: {
-              id: updatedOrder.id,
-              status: status,
-              updated_at: new Date()
-            }
-          });
-        }
-      }
-
-      res.json(updatedOrder);
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      res.status(500).json({ error: 'Failed to update order status' });
-    }
-  }*/
 
     async updateOrderStatus(req, res) {
       try {

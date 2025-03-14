@@ -62,10 +62,12 @@ const favoritesRoutes = require('./src/routes/favoritesRoutes');
 const reclamationsRoutes = require('./src/routes/reclamationRoutes');
 const ratingRoutes = require('./src/routes/ratingRoutes');
 const scheduleRoutes = require('./src/routes/scheduleRoutes');
+// const notifRoutes = require('./src/routes/notificationRoutes');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { createServer } = require('http');
 const { wss, notifyClient } = require('./websocket');
+const cors = require('cors');
 
 const app = express();
 const server = createServer(app);
@@ -80,6 +82,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(express.json());
+app.use(cors());
 
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
@@ -90,6 +93,7 @@ app.use('/favorites', favoritesRoutes);
 app.use('/reclamations', reclamationsRoutes);
 app.use('/ratings', ratingRoutes);
 app.use('/schedule', scheduleRoutes);
+// app.use('/notif', notifRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.locals.sendToUser = notifyClient;

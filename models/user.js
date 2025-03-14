@@ -86,6 +86,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2), // Define DECIMAL with precision 10, scale 2
       allowNull: true,
     },
+    pushToken: {
+      type: DataTypes.STRING,
+      allowNull: true, // Some users might not have push notifications enabled
+    },
   }, {
     timestamps: false,  // Disable automatic timestamps
     tableName: 'users'

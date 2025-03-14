@@ -76,5 +76,7 @@ router.post('/verify-token', userController.verifyToken);
 router.post('/change-password', userController.changePassword);
 
 router.get('/restaurants/with-promotions', userController.getRestaurantsWithPromotions);
+router.post('/save-push-token', userController.savePushToken);
+
 
 module.exports = router;
