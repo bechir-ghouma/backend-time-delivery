@@ -24,6 +24,9 @@ RUN apt-get update -qq && \
 COPY package-lock.json package.json ./
 RUN npm ci
 
+# Rebuild bcrypt to ensure native binaries are correctly compiled
+RUN npm rebuild bcrypt
+
 # Copy application code
 COPY . .
 
