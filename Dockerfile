@@ -24,8 +24,8 @@ RUN apt-get update -qq && \
 COPY package-lock.json package.json ./
 RUN npm ci
 
-# Rebuild bcrypt to ensure native binaries are correctly compiled
-RUN npm rebuild bcrypt
+# Remove existing bcrypt and reinstall from source to ensure proper compilation
+RUN rm -rf node_modules/bcrypt && npm install bcrypt --build-from-source
 
 # Copy application code
 COPY . .
