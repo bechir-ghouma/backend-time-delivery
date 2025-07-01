@@ -1,22 +1,25 @@
 const { User,Category,Menu } = require('../../models');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
-const nodemailer = require('nodemailer');
+const emailService = require('./emailService');
 const RegularScheduleService = require('./RegularScheduleService');
 const EmergencyClosureService = require('./EmergencyClosureService');
-const transporter = nodemailer.createTransport({
-  service: 'gmail', // Utilisez votre service e-mail (ex. SendGrid, Mailgun, etc.)
-  auth: {
-      user: 'ketatasalem7@gmail.com', // Remplacez par votre e-mail
-      pass: 'ahan ygra ovgf tvtx' // Mot de passe de l'application
-  }
-});
 
 class UserService {
   async createUser(userData) {
     const saltRounds = 10; // You can adjust this number based on your security needs
     userData.password = await bcrypt.hash(userData.password, saltRounds);
-    return User.create(userData);
+    const user = await User.create(userData);
+    
+    // Send welcome email
+    try {
+      await emailService.sendWelcomeEmail(user.email, user.first_name);
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+      // Don't throw error here as user creation was successful
+    }
+    
+    return user;
   }
 
   async getAllUsers() {
@@ -40,9 +43,6 @@ class UserService {
   
     throw new Error('User not found');
   }
-  
-  
-
 
   async deleteUser(userId) {
     const user = await this.getUserById(userId);
@@ -96,7 +96,6 @@ class UserService {
 
         // Récupérer le schedule régulier
         const regularSchedule = await RegularScheduleService.getSchedule(restaurantId);
-
 
         // Ajouter les schedules aux données utilisateur
         user.dataValues.regularSchedule = regularSchedule;
@@ -152,31 +151,14 @@ class UserService {
     });
   }
 
-  async sendPasswordResetEmail(email, verificationCode) {
-    try {
-        await transporter.sendMail({
-            from: 'ketatasalem7@gmail.com',
-            to: email,
-            subject: 'Code de réinitialisation de mot de passe',
-            text: `Votre code de réinitialisation de mot de passe est : ${verificationCode}. Ce code est valable pour 10 minutes.`,
-            html: `<p>Votre code de réinitialisation de mot de passe est : <b>${verificationCode}</b></p><p>Ce code est valable pour 10 minutes.</p>`
-        });
-        console.log('E-mail de réinitialisation envoyé');
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation:', error); // Full error log
-        throw new Error(`Impossible d'envoyer l'e-mail de réinitialisation: ${error.message}`);
-    }
-};
-
-
   async resetPasswordSendingMail(email){
     const user = await User.findOne({ where: { email } });
     if (!user) {
       throw new Error('Utilisateur non trouvé');
-  }
+    }
 
     // Générer un code de vérification et une date d'expiration
-    const verificationCode =  Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // expiration dans 10 minutes
 
     // Enregistrer le code et l'expiration
@@ -186,12 +168,15 @@ class UserService {
 
     // Envoyer l'e-mail avec le code
     try {
-      await this.sendPasswordResetEmail(email, verificationCode);
-              console.log('Un code de réinitialisation a été envoyé à votre adresse e-mail.');
+      await emailService.sendPasswordResetEmail(email, verificationCode);
+      console.log('Un code de réinitialisation a été envoyé à votre adresse e-mail.');
+      return { message: 'Un code de réinitialisation a été envoyé à votre adresse e-mail.' };
     } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation:', error);
       throw new Error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation');
     }
   }
+
   async verifyToken(email, verificationCode) {
     const user = await User.findOne({ where: { email, verificationCode } });
     if (!user) {
@@ -219,6 +204,11 @@ class UserService {
 
     // Update the user's password
     user.password = hashedPassword;
+    
+    // Clear verification code after successful password change
+    user.verificationCode = null;
+    user.verificationCodeExpiresAt = null;
+    
     await user.save();
 
     return { message: 'Mot de passe mis à jour avec succès' };
@@ -263,7 +253,6 @@ class UserService {
   
     return usersWithPromotions;
   }
-  
 }
 
 module.exports = new UserService();
